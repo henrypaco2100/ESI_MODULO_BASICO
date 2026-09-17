@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de contactos-->
+<odoo>
+   <data>
+        <record model="ir.ui.view" id="sd_inherit_account_move_lines_enter_account_form">
+            <field name="name">sd_inherit_account_move_lines_mejoras_form</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_move_line_tree_grouped"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='date']" position="before">
+                    <button name="action_view_account_move" type="object" class="btn btn-primary" string="Ver"/>
+                </xpath>
+                <xpath expr="//field[@name='credit']" position="after">
+                    <field name="sd_saldo" optional="show" sum="Total Saldo" widget="Monetary"/>
+                </xpath>
+            </field>
+        </record>
+       <!--       REEMPLAZANDO EL CAMPO ANALYTIC_ACCOUNT_ID EN LINEAS DEL ASIENTO CONTABLE -->
+       <record model="ir.ui.view" id="sd_inherit_account_move_line_analytic_account_filter">
+            <field name="name">sd_inherit_account_move_lines_mejoras_filtro</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="/form/sheet/notebook/page/field[@name='line_ids']/tree/field[@name='analytic_account_id']" position="after">
+                    <field name="sd_analytic_group" optional="hide"/>
+                    <field name="sd_has_analytic_group" invisible="1"/>
+<!--                    <field name="sd_analytic_account_list"/>-->
+                </xpath>
+                <xpath expr="/form/sheet/notebook/page/field[@name='line_ids']/tree/field[@name='analytic_account_id']" position="attributes">
+                    <attribute name="domain">['&amp;', '|', ('company_id', '=', parent.company_id), ('company_id', '=', False), ('group_id', '=', sd_analytic_group), (sd_has_analytic_group, '=', True)]</attribute>
+
+
+<!--                    <attribute name="domain">{['|', ('company_id', '=', parent.company_id), ('company_id', '=', False)]: [('sd_has_analytic_group','=',False)]}</attribute>-->
+<!--                    <attribute name="domain">{['&amp;', '|', ('company_id', '=', parent.company_id), ('company_id', '=', False), ('group_id', '=', sd_analytic_group), (sd_has_analytic_group, '==', True)]: [('sd_has_analytic_group','==',True)]}</attribute>-->
+
+<!--                    <t t-if="sd_has_analytic_group == False">-->
+<!--                        <t-esc>-->
+<!--                            <attribute name="domain">['|', ('company_id', '=', parent.company_id), ('company_id', '=', False)]</attribute>-->
+<!--                        </t-esc>-->
+<!--                    </t>-->
+<!--                    <t t-if="sd_has_analytic_group == True">-->
+<!--                        <t-esc>-->
+<!--                            <attribute name="domain">['&amp;', '|', ('company_id', '=', parent.company_id), ('company_id', '=', False), ('group_id', '=', sd_analytic_group), (sd_has_analytic_group, '=', True)]</attribute>-->
+<!--                        </t-esc>-->
+<!--                    </t>-->
+
+<!--                    <attribute name="domain">-->
+<!--                        [('company_id', '=', parent.company_id), '|', ('company_id', '=', False), ('group_id', '=', sd_analytic_group)]-->
+<!--                        if sd_has_analytic_group else-->
+<!--                        [('company_id', '=', parent.company_id), ('company_id', '=', False)]-->
+<!--                    </attribute>-->
+
+<!--                    <attribute name="domain">-->
+<!--                        {['&amp;', '|', ('company_id', '=', parent.company_id), ('company_id', '=', False), ('group_id', '=', sd_analytic_group)]: [(sd_has_analytic_group, '=', True)]}-->
+<!--                    </attribute>-->
+
+<!--                    <attribute name="domain">-->
+<!--                        [(analytic_account_id, '=', sd_has_analytic_group and ('&amp;', '|', ('company_id', '=', parent.company_id), ('company_id', '=', False), ('group_id', '=', sd_analytic_group)) or ('|', ('company_id', '=', parent.company_id), ('company_id', '=', False)))]-->
+<!--                    </attribute>-->
+
+<!--                    <spam t-if="'sd_has_analytic_group' == False">-->
+<!--                        <attribute name="domain">['&amp;', '|', ('company_id', '=', parent.company_id), ('company_id', '=', False), ('group_id', '=', sd_analytic_group), (sd_has_analytic_group, '=', True)]</attribute>-->
+<!--                    </spam>-->
+<!--                    <t t-if="sd_has_analytic_group == 'False'">-->
+<!--                        <attribute name="domain">['|', ('company_id', '=', parent.company_id), ('company_id', '=', False)]</attribute>-->
+<!--                    </t>-->
+
+<!--                    <div t-if="sd_has_analytic_group = False">-->
+<!--                        <attribute t-if="sd_has_analytic_group = False" name="domain">['&amp;', '|', ('company_id', '=', parent.company_id), ('company_id', '=', False), ('group_id', '=', sd_analytic_group), (sd_has_analytic_group, '=', True)]</attribute>-->
+<!--                    </div>-->
+
+<!--                    <attribute name="domain">['&amp;', '|', ('company_id', '=', parent.company_id), ('company_id', '=', False), ('id', 'in', sd_analytic_account_list)]</attribute>-->
+
+
+                </xpath>
+            </field>
+       </record>
+       <record model="ir.ui.view" id="sd_inherit_account_move_line_form_grupo_financiero">
+            <field name="name">sd_inherit_account_move_line_form_grupo_financiero</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_move_line_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='account_id']" position="after">
+                    <field name="sd_grupo_financiero"/>
+                </xpath>
+            </field>
+        </record>
+       <record model="ir.ui.view" id="sd_inherit_account_move_line_tree_grupo_financiero">
+            <field name="name">sd_inherit_account_move_line_tree_grupo_financiero</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_move_line_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='account_id']" position="after">
+                    <field name="sd_grupo_financiero" optional="hide"/>
+                </xpath>
+            </field>
+        </record>
+       <record model="ir.ui.view" id="sd_inherit_account_move_line_search">
+            <field name="name">sd_inherit_account_move_line_search</field>
+            <field name="model">account.move.line</field>
+            <field name="inherit_id" ref="account.view_account_move_line_filter"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group" position="inside">
+                    <filter string="Grupo Cuenta" name="group_by_grupo_financiero" domain="[]" context="{'group_by': 'sd_grupo_financiero'}"/>
+                    <filter string="Compañia" name="group_by_compañia" domain="[]" context="{'group_by': 'company_id'}"/>
+                </xpath>
+            </field>
+        </record>
+   </data>
+</odoo>
+

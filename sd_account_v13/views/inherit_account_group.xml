@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de grupos RELACION ENTRE GRUPO DE CUENTA Y GRUPO ANALITICO-->
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sd_inherit_account_group_form">
+            <field name="name">sd_inherit_account_group_form</field>
+            <field name="model">account.group</field>
+            <field name="inherit_id" ref="account.view_account_group_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="/form/sheet/group/field[@name='parent_id']" position="after">
+                    <field name="sd_analytic_group"/>
+                </xpath>
+<!--                <field name="parent_id" position="after">-->
+<!--                    <field name="sd_analytic_group"/>-->
+<!--                </field>-->
+            </field>
+        </record>
+    </data>
+</odoo>

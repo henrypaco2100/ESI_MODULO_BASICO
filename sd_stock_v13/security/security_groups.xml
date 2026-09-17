@@ -1,0 +1,21 @@
+<odoo>
+    <data>
+        <record model="ir.module.category" id="sd_padre_del_padre_categoria_reporte_inventario">
+            <field name="name">Inventario Permisos</field>
+            <field name="description">Modulo para gestion de reportes de inventario</field>
+            <field name="sequence">10</field>
+        </record>
+        <record id="sd_reporte_inventario_categoria" model="ir.module.category">
+            <field name="name">Inventario Permisos</field>
+            <field name="sequence" eval="1"/>
+            <field name="parent_id" ref="sd_padre_del_padre_categoria_reporte_inventario"/>
+        </record>
+
+
+
+        <record id="sd_categorias_secuencia_producto" model="res.groups">
+			<field name="name">Creacion ref interna de productos</field>
+            <field name="category_id" ref="base.module_category_operations_inventory"/>
+		</record>
+    </data>
+</odoo>

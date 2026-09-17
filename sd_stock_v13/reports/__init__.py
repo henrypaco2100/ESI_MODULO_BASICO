@@ -1,0 +1,6 @@
+from . import report_stock_picking_entrega_consignacion
+from . import report_stock_picking_recepcion_materiales
+from . import report_stock_picking_3
+from . import report_stock_picking_recepcion_consignacion
+from . import report_stock_picking_devolucion_proveedores
+from . import report_stock_picking_devolucion_librerias

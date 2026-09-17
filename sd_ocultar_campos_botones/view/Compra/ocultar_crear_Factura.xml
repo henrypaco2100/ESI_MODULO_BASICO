@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de Compra- ocultar crear factura-->
+<odoo>
+   <data>
+    <record model="ir.ui.view" id="purchase_order_ocultar_button_crear_Facutra">
+            <field name="name">purchase.order.hide.button.crear.factura</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='action_view_invoice']" position="attributes">
+                    <attribute name='name'>action_view_invoice1</attribute>
+                    <attribute name='invisible'>1</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_view_invoice']" position="attributes">
+                    <attribute name='invisible'>1</attribute>
+                </xpath>
+                <!-- VOlvemos el button a su nombre original-->
+                <xpath expr="//button[@name='action_view_invoice1']" position="attributes">
+                    <attribute name='name'>button_confirm</attribute>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

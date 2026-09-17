@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record model="ir.ui.view" id="sd_form_button_reprocesar_stock_move">
+            <field name="name">form.button.reprocesar.stock.move</field>
+            <field name="model">stock.move</field>
+            <field name="inherit_id" ref="stock.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="/form/*" position="before">
+                    <header>
+                        <button name="reprocesar_movimiento_existencias" type="object" string="Reprocesar"
+                                class="btn btn-primary" confirm='¿Esta seguro que desea continuar?'/>
+                    </header>
+                </xpath>
+            </field>
+    </record>
+    <record id="sd_reprocesar_movimiento_existencia" model="ir.actions.server">
+        <field name="name">Reprocesar</field>
+<!--        <field name="type">ir.actions.server</field>-->
+        <field name="model_id" ref="model_stock_move" />
+        <field name="binding_model_id" ref="model_stock_move" />
+        <field name="state">code</field>
+        <field name="code">records.reprocesar_movimiento_existencias()</field>
+    </record>
+    <menuitem id='sd_menu_item_reprocesar_movimiento_existencia' name='Reprocesar' sequence="100" parent="stock.menu_warehouse_report"
+              action="sd_reprocesar_movimiento_existencia" groups="sd_stock_valuation_layer.sd_grupo_permiso_reprocesar_movimientos_existencia"/>
+</odoo>

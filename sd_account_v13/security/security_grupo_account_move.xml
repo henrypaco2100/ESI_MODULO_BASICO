@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="sd_grupo_cancelar_account_move_mejoras" model="res.groups">
+            <field name="name">Cancelar/Cambiar a Borrador Asientos</field>
+        </record>
+
+         <record id="sd_tecnico_cargar_saldo_contable" model="res.groups">
+            <field name="name">Reporte / Cargar saldos contables</field>
+        </record>
+    </data>
+</odoo>

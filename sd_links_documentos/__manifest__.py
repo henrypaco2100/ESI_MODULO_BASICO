@@ -1,0 +1,18 @@
+# -*- coding: utf-8 -*-
+{'name': 'Links Documentos',
+ 'category': 'Inventory/Inventory',
+ 'summary': 'Links Documentos',
+ 'version': '2.0',
+ 'author': 'ESI - Especialistas en Sistemas Integrados',
+ 'website': 'https://esibolivia.store',
+ 'description': 'Botones Adicionales en Facturas, Pagos y Transferencias,',
+ 'depends': ['account', 'stock', 'sale_stock'],
+ 'data': ['views/account_move_inherit_view.xml',
+          'views/payment_move_inherit_view.xml',
+          'views/stock_picking_inherit_view.xml',
+          'views/stock_move_line_inherit_view.xml',
+          'views/account_move_line_inherit_view.xml'],
+ 'images': ['static/description/Sodigitalint.png'],
+ 'installable': True,
+ 'auto_install': False,
+ 'maintainer': 'ESI - Especialistas en Sistemas Integrados'}

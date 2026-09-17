@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de Ventas-->
+<odoo>
+   <data>
+    <record model="ir.ui.view" id="sale_order_ocultar_button_confirmar">
+            <field name="name">sale.order.hide.button.confirmar</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <!-- ocultamos los campos "Dirrecion de Factura" y "DIrrecion ENtrega"-->
+                <xpath expr="//field[@name='partner_invoice_id']" position="attributes">
+                    <attribute name='invisible'>1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='partner_shipping_id']" position="attributes">
+                    <attribute name='invisible'>1</attribute>
+                </xpath>
+
+                <!-- ocultar el boton confimar
+                existen 2 button con el mismo nombre, primero modificamos un nombre de uno
+                para luego ocultar ambos-->
+                 <xpath expr="//button[@name='action_confirm']" position="attributes">
+                    <attribute name='name'>action_confirm1</attribute>
+                     <attribute name='invisible'>1</attribute>
+                </xpath>
+                <xpath expr="//button[@name='action_confirm']" position="attributes">
+                    <attribute name='invisible'>1</attribute>
+                </xpath>
+
+                <!-- Volver  a su nombre normal el button action confirm-->
+                <xpath expr="//button[@name='action_confirm1']" position="attributes">
+                    <attribute name='name'>action_confirm</attribute>
+                </xpath>
+
+                <!-- editar la class del button "Enviar por Email"-->
+                <xpath expr="//button[@name='action_quotation_send']" position="attributes">
+                    <attribute name='class'>btn-light</attribute>
+                </xpath>
+                <!-- Ocultar Productos Opcionales -->
+                <xpath expr="//page[@name='optional_products']" position="attributes">
+                    <attribute name='invisible'>1</attribute>
+                </xpath>
+                <!-- NO Modificar Entrega -->
+                <xpath expr="/form/sheet/notebook/page/group/group/field[@name='warehouse_id']" position="attributes">
+                    <attribute name='readonly'>1</attribute>
+                </xpath>
+<!--                ocultar impuesto-->
+<!--                <xpath expr="/form/sheet/notebook/page/field/tree/field[@name='tax_id']" position="attributes">-->
+<!--                    <attribute name='invisible'>1</attribute>-->
+<!--                </xpath>-->
+            </field>
+        </record>
+    </data>
+</odoo>

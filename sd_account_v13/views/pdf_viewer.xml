@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record  id="sd_action_arbol_pdf_viewer" model="ir.actions.act_window">
+                <field name="name">Productos Siat</field>
+                <field name="type">ir.actions.act_window</field>
+                <field name="res_model">pdf.viewer</field>
+                <field name="view_mode">form</field>
+                <field name="help" type="html">
+                    <p class="o_view_nocontent_smiling_face">
+                        Crear Formulario Pdf viewer
+                    </p>
+                </field>
+        </record>
+<!--        <record id="sd_arbol_pdf_viewer" model="ir.ui.view">-->
+<!--            <field name="name">arbol.pdf.viewer</field>-->
+<!--            <field name="model">pdf.viewer</field>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <tree>-->
+<!--                    <field name="name"/>-->
+<!--                </tree>-->
+<!--            </field>-->
+<!--        </record>-->
+
+        <record id="sd_form_pdf_viewer" model="ir.ui.view">
+            <field name="name">fields.form.pdf.viewer</field>
+            <field name="model">pdf.viewer</field>
+            <field name="arch" type="xml">
+                <form>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <field name="sd_archivo" widget="pdf_viewer" readonly="1"/>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

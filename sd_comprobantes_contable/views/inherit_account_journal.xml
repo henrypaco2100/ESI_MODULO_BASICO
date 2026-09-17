@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="sd_view_account_journal_report_mejoras" model="ir.ui.view">
+            <field name="name">account.move.journal.mejoras</field>
+            <field name="model">account.journal</field>
+            <field name="inherit_id" ref="account.view_account_journal_form"/>
+            <field name="arch" type="xml">
+                <field name="restrict_mode_hash_table" position="after">
+                    <field name="sd_show_glosa"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

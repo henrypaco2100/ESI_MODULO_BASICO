@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de contactos-->
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sd_inherit_res_config_settings_valuation">
+            <field name="name">sd_inherit_res_config_settings</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="sd_stock_v13.sd_inherit_res_config_settings"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='sd_div_filter_uom_inhertit']/div" position="after">
+                        <div class="col-12 col-lg-6 o_setting_box" name="sd_valuation_producto">
+                            <div class="o_setting_left_pane">
+                                <field name="sd_is_change_price_valuation"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <spam><strong>Valoracion del Producto</strong></spam>
+                                <div class="text-muted">
+                                    Generar Valoracion en AVCO(Promedio) al cambiar el Coste del producto.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-6 o_setting_box" name="sd_valuation_cost_method">
+                            <div class="o_setting_left_pane">
+                                <field name="sd_is_change_cost_method_and_val"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <spam><strong>Método de coste y Valoración del inventario</strong></spam>
+                                <div class="text-muted">
+                                    Generar Valoracion al cambiar Método de coste y Valoración del inventario.
+                                </div>
+                            </div>
+                        </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

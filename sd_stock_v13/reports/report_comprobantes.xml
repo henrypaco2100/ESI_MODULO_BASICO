@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <report
+        id="sd_action_stock_picking_entrega_consignacion"
+        model="stock.picking"
+        string="Entrega de Consignación"
+        report_type="qweb-pdf"
+        name="sd_stock_v13.sd_report_stock_picking_entrega_consignacion"
+        file="sd_stock_v13.report_stock_picking_entrega_consignacion"
+        print_report_name="('Entrega de Consignación')"
+        groups="stock.group_stock_manager"
+    />
+    <template id="sd_stock_picking_entrega_consignacion">
+        <div class="article" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+          <t t-raw="0" />
+        </div>
+    </template>
+
+    <report
+        id="sd_action_stock_picking_recepcion_materiales"
+        model="stock.picking"
+        string="Recepción de Materiales"
+        report_type="qweb-pdf"
+        name="sd_stock_v13.sd_report_stock_picking_recepcion_materiales_template"
+        file="sd_stock_v13.report_stock_picking_recepcion_materiales"
+        print_report_name="('Recepción de Materiales')"
+        groups="stock.group_stock_manager"
+    />
+    <template id="sd_stock_picking_recepcion_materiales">
+        <div class="article" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+          <t t-raw="0" />
+        </div>
+    </template>
+
+    <report
+        id="sd_action_stock_picking_3"
+        model="stock.picking"
+        string="Nota de Remisión"
+        report_type="qweb-pdf"
+        name="sd_stock_v13.sd_report_stock_picking_template_3"
+        file="sd_stock_v13.report_account_move_version_2"
+        print_report_name="('Nota de Remisión')"
+        groups="stock.group_stock_manager"
+    />
+    <template id="sd_stock_picking_3">
+        <div class="article" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+          <t t-raw="0" />
+        </div>
+    </template>
+
+    <report
+        id="sd_action_stock_picking_recepcion_consignacion"
+        model="stock.picking"
+        string="Recepción de Consignación"
+        report_type="qweb-pdf"
+        name="sd_stock_v13.sd_report_stock_picking_recepcion_consignacion"
+        file="sd_stock_v13.report_stock_picking_recepcion_consignacion"
+        print_report_name="('Recepción de Consignación')"
+        groups="stock.group_stock_manager"
+    />
+    <template id="sd_stock_picking_recepcion_consignacion">
+        <div class="article" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+          <t t-raw="0" />
+        </div>
+    </template>
+
+    <report
+        id="sd_action_stock_picking_devolucion_proveedores"
+        model="stock.picking"
+        string="Devolución de Proveedores"
+        report_type="qweb-pdf"
+        name="sd_stock_v13.sd_report_stock_picking_devolucion_proveedores"
+        file="sd_stock_v13.report_stock_picking_devolucion_proveedores"
+        print_report_name="('Devolución a Proveedores')"
+        groups="stock.group_stock_manager"
+    />
+    <template id="sd_stock_picking_devolucion_proveedores">
+        <div class="article" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+          <t t-raw="0" />
+        </div>
+    </template>
+
+    <report
+        id="sd_action_stock_picking_devolucion_librerias"
+        model="stock.picking"
+        string="Devolución de Librerías"
+        report_type="qweb-pdf"
+        name="sd_stock_v13.sd_report_stock_picking_devolucion_librerias"
+        file="sd_stock_v13.report_stock_picking_devolucion_librerias"
+        print_report_name="('Devolución a Librerias')"
+        groups="stock.group_stock_manager"
+    />
+    <template id="sd_stock_picking_devolucion_librerias">
+        <div class="article" t-att-data-oe-model="o and o._name" t-att-data-oe-id="o and o.id" t-att-data-oe-lang="o and o.env.context.get('lang')">
+          <t t-raw="0" />
+        </div>
+    </template>
+
+</odoo>

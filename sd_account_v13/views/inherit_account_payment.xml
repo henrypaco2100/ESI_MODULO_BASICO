@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de contactos-->
+<odoo>
+   <data>
+        <record  id="sd_action_arbol_account_payment_method_tipos" model="ir.actions.act_window">
+                <field name="name">Tipos de metodos de pago</field>
+                <field name="type">ir.actions.act_window</field>
+                <field name="res_model">account.payment.method</field>
+                <field name="view_mode">tree,form</field>
+                <field name="help" type="html">
+                    <p class="o_view_nocontent_smiling_face">
+                        Crear Formulario Tipos de metodos de pago
+                    </p>
+                </field>
+        </record>
+        <record id="sd_arbol_account_payment_method_tipos" model="ir.ui.view">
+            <field name="name">arbol.account.payment.method.tipos</field>
+            <field name="model">account.payment.method</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="payment_type"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="sd_form_account_payment_method_tipos" model="ir.ui.view">
+            <field name="name">fields.form.account.payment.method.tipos</field>
+            <field name="model">account.payment.method</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="payment_type"/>
+                            </group>
+                            <group>
+                                <field name="code"/>
+                            </group>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+       <!-- ocultar campo fecha vencimiento-->
+<!--        <record id="ocultar_fecha_vencimiento_por_diario_" model="ir.ui.view">-->
+<!--            <field name="name">account.move.ocultar.fecha.vencimiento.por.diario</field>-->
+<!--            <field name="model">account.move</field>-->
+<!--            <field name="inherit_id" ref="account.view_invoice_tree"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <xpath expr="//field[@name='invoice_date_due']" position="attributes">-->
+<!--                    <attribute name='invisible'>1</attribute>-->
+<!--                </xpath>-->
+<!--                <xpath expr="//field[@name='invoice_date_due']" position="after">-->
+<!--                    <field name="journal_id"/>-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--        </record>-->
+       <menuitem
+        id="sd_menu_tipos_metodos_pago"
+        name="Tipos de metodos de pago"
+        parent="account.root_payment_menu"
+        action="sd_action_arbol_account_payment_method_tipos"
+        sequence="2"/>
+   </data>
+</odoo>

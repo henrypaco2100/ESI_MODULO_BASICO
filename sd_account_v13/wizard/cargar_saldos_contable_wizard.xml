@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="sd_form_cargar_saldo_contable" model="ir.ui.view">
+            <field name="name">Cargar Saldo</field>
+            <field name="model">cargar.saldo.contable</field>
+            <field name="arch" type="xml">
+                <form string="Cargar Saldos">
+                    <sheet>
+                        <p>
+                            <strong>Descripción: </strong>Carga los saldos contables todos sin excepcion de los borradores y cancelados.
+                        </p>
+                    </sheet>
+                    <footer>
+                        <button name="action_cargar_saldo_contable" string="Cargar" type="object" default_focus="1"
+                            class="oe_highlight"/>
+                        <button string="Cancelar" class="btn btn-default" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+    </data>
+     <record id="sd_action_cargar_saldo_contable" model="ir.actions.act_window">
+        <field name="name">Cargar saldo contable</field>
+        <field name="res_model">cargar.saldo.contable</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="sd_form_cargar_saldo_contable"/>
+        <field name="target">new</field>
+    </record>
+    <menuitem id="sd_menu_tecnico_cargar_saldo_contable" name="Cargar Saldo" parent="account.menu_finance_reports"
+              sequence="160" action="sd_action_cargar_saldo_contable"
+              groups="sd_account_v13.sd_tecnico_cargar_saldo_contable"
+    />
+</odoo>

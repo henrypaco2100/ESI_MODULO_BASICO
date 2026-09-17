@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data >
+		<record id="sd_stock_valuation_layer_group_cancelar_purchase" model="res.groups">
+			<field name="name">Forzar cancelar entradas con movimientos(compra)</field>
+			<field name="category_id" ref="sd_stock_v13.sd_reporte_inventario_categoria"/>
+		</record>
+		<record id="sd_grupo_permiso_reprocesar_movimientos_existencia" model="res.groups">
+			<field name="name">Inventario/Reprocesar</field>
+			<field name="category_id" ref="sd_stock_v13.sd_reporte_inventario_categoria"/>
+		</record>
+		<record id="sd_grupo_permiso_administrar_management_company" model="res.groups">
+			<field name="name">Administracion/Gestion Compañias</field>
+			<field name="category_id" ref="sd_stock_v13.sd_reporte_inventario_categoria"/>
+		</record>
+    </data>
+</odoo>

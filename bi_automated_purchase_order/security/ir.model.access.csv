@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_automated_purchase_order,Tipo de Compra - Administrador,model_automated_purchase,purchase.group_purchase_manager,1,1,1,1
+access_automated_purchase_order_user,Tipo de Compra - Usuario,model_automated_purchase,purchase.group_purchase_user,1,0,0,0
+access_esi_purchase_payment_wizard,Registrar Pago desde Compra,model_esi_purchase_payment_wizard,purchase.group_purchase_user,1,1,1,1

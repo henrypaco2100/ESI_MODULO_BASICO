@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+sd_pdf_viewer_accesos_permiso,pdf viewer,model_pdf_viewer,,1,1,1,1
+sd_historial_transaccion_accesos_permiso,historial transaccion,model_historial_transaccion,,1,1,1,1
+sd_rastreo_payment_origin_accesos_permiso,rastreo payment,model_historial_transaccion,,1,1,1,1

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sd_form_inherit_product_template_secuencia">
+             <field name="name">sd_form_inherit_product_template_secuencia</field>
+             <field name="model">product.template</field>
+             <field name="inherit_id" ref="product.product_template_only_form_view"/>
+             <field name="arch" type="xml">
+                 <field name="default_code" position="after">
+                     <field name="sd_autor"/>
+                     <button name="action_obtener_siguiente_sequencia"
+					           		string="Referencia"
+					            	type="object" icon="fa-refresh"
+                                    groups="sd_stock_v13.sd_categorias_secuencia_producto"/>
+                 </field>
+
+             </field>
+        </record>
+    </data>
+
+</odoo>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<odoo noupdate="1">
+    <record model="res.groups" id="group_multi_automated_sale">
+        <field name="name">Multi Automate sale</field>
+        <field name="category_id" ref="base.module_category_usability"/>
+        <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+<!--    <record id="sd_automated_sale_restrincion_rule" model="ir.rule">-->
+<!--        <field name="name">Restrincion Automate</field>-->
+<!--        <field name="model_id" ref="bi_automated_sale_order.model_automated_sale"/>-->
+<!--        <field name="global" eval="True"/>-->
+<!--        <field name="domain_force">['|',('work_process_order_id','=',False),('work_process_order_id','in',user.automated_sale_ids.ids)]</field>-->
+<!--        <field name="perm_read" eval="False"/>-->
+<!--    </record>-->
+</odoo>

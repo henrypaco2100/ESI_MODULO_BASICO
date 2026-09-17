@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_automated_sale_order,Tipo de Venta - Administrador,model_automated_sale,sales_team.group_sale_manager,1,1,1,1
+access_automated_sale_order_user,Tipo de Venta - Usuario,model_automated_sale,sales_team.group_sale_salesman,1,0,0,0
+access_esi_sale_payment_wizard,Registrar Pago desde Venta,model_esi_sale_payment_wizard,sales_team.group_sale_salesman,1,1,1,1

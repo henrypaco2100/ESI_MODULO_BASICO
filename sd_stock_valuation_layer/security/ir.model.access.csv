@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+sd_model_stock_valuation_detailed_id,stock_valuation_detailed permisso,model_stock_valuation_detailed,,1,1,1,1
+sd_model_wizard_reprocesar,sd_wizard_reprocesar permisso,model_wizard_reprocesar,sd_stock_valuation_layer.sd_grupo_permiso_reprocesar_movimientos_existencia,1,1,1,1
+sd_model_management_company_admin,sd model management company permisos admin,model_management_company,sd_stock_valuation_layer.sd_grupo_permiso_administrar_management_company,1,1,1,1
+sd_model_management_company_users,sd model management company permisos users,model_management_company,,1,0,0,0

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de ajuste de inventario line-->
+<odoo>
+    <record model="ir.ui.view" id="sd_inherit_res_company_button_box">
+            <field name="name">sd.inherit.res.company.button.box</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <field name="logo" position="before">
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" name="action_view_management_company" type="object" icon="fa-paperclip">
+                            <field string="Gestion" name="sd_management_count" widget="statinfo" />
+                        </button>
+                    </div>
+                </field>
+                <sheet position="before">
+                    <header>
+                        <button name="create_management_company" type="object" string="Nueva Gestion"
+                            class="btn-primary"
+                            groups="sd_stock_valuation_layer.sd_grupo_permiso_administrar_management_company"/>
+                    </header>
+                </sheet>
+                <field name="partner_id" position="after">
+                    <field name="sd_date_ini_management" invisible="1"/>
+                    <field name="sd_date_end_management" invisible="1"/>
+                    <field name="sd_management_ids" widget="many2many_tags" invisible="1"/>
+                </field>
+            </field>
+    </record>
+</odoo>

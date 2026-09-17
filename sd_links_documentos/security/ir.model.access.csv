@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_kardex_report,access_kardex_report,model_kardex_report,base.group_user,1,1,1,1
+access_report_lines_kardex,access_report_lines_kardex,model_report_lines_kardex,base.group_user,1,1,1,1

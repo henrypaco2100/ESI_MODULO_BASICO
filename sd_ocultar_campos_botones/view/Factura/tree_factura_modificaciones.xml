@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Arbol de Factura-->
+<odoo>
+    <data>
+        <!-- ocultar campo fecha vencimiento-->
+        <record id="ocultar_fecha_vencimiento_por_diario_" model="ir.ui.view">
+            <field name="name">account.move.ocultar.fecha.vencimiento.por.diario</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_invoice_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='invoice_date_due']" position="attributes">
+                    <attribute name='invisible'>1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='invoice_date_due']" position="after">
+                    <field name="journal_id"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

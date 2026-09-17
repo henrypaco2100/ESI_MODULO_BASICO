@@ -1,0 +1,19 @@
+ESI - MODIFICACION COMPROBANTES CONTABLES - ODOO 13
+Fecha: 2026-09-01
+Base analizada: commit 6d6c64b466fdb4a3dac685e74d3d60fc77501b0d
+
+Cambios:
+1. Nuevo apartado "Comprobante Contable" en account.move > Otra informacion.
+2. Se mueve visualmente el campo existente "Columna Fecha" (sd_is_fecha) a ese apartado.
+3. Nuevo booleano "Mostrar CTA Flujo" (sd_show_cash_flow).
+4. Nuevo booleano "Mostrar Analítica" (sd_show_analytic).
+5. Los dos reportes de account.move (Comprobante 1 y Comprobante 2) imprimen opcionalmente:
+   - CTA FLUJO: account.move.line.esi_cash_flow_id
+   - ANALITICA: account.move.line.analytic_account_id
+6. Se conserva la logica original de Columna Fecha:
+   - Formato 1: line.date_maturity
+   - Formato 2: line.date
+7. Dependencias explicitas:
+   - bi_financial_pdf_reports (crea esi.cash.flow y esi_cash_flow_id)
+   - bi_financial_excel_reports (modulo financiero integrado; depende del PDF)
+8. No se modifica la logica original de numero_to_letras / convierte_cifra de los reportes account.move.

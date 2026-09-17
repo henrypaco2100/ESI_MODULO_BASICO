@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de valoracion-->
+<odoo>
+<!--    <record model="ir.ui.view" id="sd_stock_valuation_layer_heredar_button_reprocesar">-->
+<!--            <field name="name">sd.stock.valuation.layer.heredar.reprocesar</field>-->
+<!--            <field name="model">stock.valuation.layer</field>-->
+<!--            <field name="inherit_id" ref="stock_account.stock_valuation_layer_form"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <xpath expr="/form/*" position="before">-->
+<!--                    <header>-->
+<!--                        <button name="reprocesar_valoracion_sin_rastreo_kh" type="object" string="Reprocesar"/>-->
+<!--                    </header>-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--    </record>-->
+    <record id="stock_account.stock_valuation_layer_action" model="ir.actions.act_window">
+        <field name="domain">[('state','=','confirmed')]</field>
+<!--        <field name="domain">[]</field>-->
+    </record>
+</odoo>

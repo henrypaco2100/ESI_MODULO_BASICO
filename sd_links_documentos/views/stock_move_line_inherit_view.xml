@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+       <record model="ir.ui.view" id="inherit_view_stock_move_line_form">
+        <field name="name">inherit.stock.move.line.form</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock.view_move_line_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='company_id']" position="before">
+                    <div class="oe_button_box" name="button_box">
+                        <field name="sd_tipo" invisible="1"/>
+                        <button name="action_get_account_moves" icon="fa-usd" class="oe_stat_button"
+                                string="Asientos Contables" type="object" groups="account.group_account_user"
+                                attrs="{'invisible': [('origin', '=', 'PM/')]}"/>
+                        <button name="action_get_purchase_moves" icon="fa-signal" class="oe_stat_button"
+                                string="Compra" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'compra')]}"/>
+                        <button name="action_get_production_moves" icon="fa-wrench" class="oe_stat_button"
+                                string="Produccion" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'production')]}"/>
+                        <button name="action_get_transfer_moves" icon="fa-truck" class="oe_stat_button"
+                                string="Transferencias" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'transferencia')]}"/>
+                        <button name="action_get_sale_moves" icon="fa-signal" class="oe_stat_button"
+                                string="Venta" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'venta')]}"/>
+                        <button name="action_get_point_of_sale_moves" icon="fa-signal" class="oe_stat_button"
+                                string="Punto de Venta" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'pos')]}"/>
+
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

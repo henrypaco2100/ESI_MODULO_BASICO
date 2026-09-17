@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="form_automate_sale_order_workflow" model="ir.ui.view">
+        <field name="name">tipo.venta.form.esi</field>
+        <field name="model">automated.sale</field>
+        <field name="arch" type="xml">
+            <form string="Tipo de Venta">
+                <sheet>
+                    <div class="alert alert-info" role="alert">
+                        <strong>ESI:</strong> este tipo define la numeración y el flujo que se aplicará al confirmar la venta.
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="st_almacen" required="1" domain="[('company_id', '=', company_id)]"/>
+                            <field name="sales_journal" required="1" domain="[('company_id', '=', company_id), ('type', '=', 'sale')]"/>
+                            <field name="payment_journal" required="1" domain="[('company_id', '=', company_id), ('type', 'in', ('bank', 'cash'))]"/>
+                            <field name="company_id" required="1" groups="base.group_multi_company"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="st_secuencia_quotation" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
+                            <field name="st_secuencia" required="1" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
+                            <field name="validation_picking"/>
+                            <field name="validate_invoice"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="tree_automate_sale_order_workflow" model="ir.ui.view">
+        <field name="name">tipo.venta.tree.esi</field>
+        <field name="model">automated.sale</field>
+        <field name="arch" type="xml">
+            <tree string="Tipo de Ventas">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="st_almacen"/>
+                <field name="sales_journal"/>
+                <field name="payment_journal"/>
+                <field name="validation_picking"/>
+                <field name="validate_invoice"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="auto_sale_workflow" model="ir.actions.act_window">
+        <field name="name">Tipo de Ventas</field>
+        <field name="res_model">automated.sale</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="view_button_automate_sale_order" model="ir.ui.view">
+        <field name="name">sale.order.tipo.venta.esi</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="work_process_order_id" string="Tipo de Venta"
+                       options="{'no_create': True, 'no_create_edit': True}"
+                       attrs="{'readonly': [('state', 'not in', ('draft', 'sent'))]}"/>
+            </field>
+            <field name="state" position="after">
+                <field name="esi_can_register_payment" invisible="1"/>
+            </field>
+            <button name="action_confirm" position="after">
+                <button name="action_open_esi_payment_wizard" type="object"
+                        string="Registrar Pago" class="btn-primary"
+                        attrs="{'invisible': [('esi_can_register_payment', '=', False)]}"/>
+            </button>
+        </field>
+    </record>
+
+    <menuitem id="menu_auto_sale"
+              name="Tipo de Ventas"
+              parent="sale.menu_sale_config"
+              action="auto_sale_workflow"
+              groups="sales_team.group_sale_manager"
+              sequence="35"/>
+</odoo>

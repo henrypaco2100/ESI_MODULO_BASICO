@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sd_form_inherit_product_category_secuencia">
+             <field name="name">sd_form_inherit_product_category_secuencia</field>
+             <field name="model">product.category</field>
+             <field name="inherit_id" ref="product.product_category_form_view"/>
+             <field name="arch" type="xml">
+                 <group name="first" position="after">
+                     <group string="Secuencia">
+                         <field name="sd_siguiente"/>
+                         <field name="sd_secuencia_id"/>
+                         <field name="sd_name_secuencia"/>
+                         <field name="sd_tam_secuencia"/>
+                     </group>
+                 </group>
+
+             </field>
+        </record>
+    </data>
+
+</odoo>

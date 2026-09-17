@@ -1,0 +1,14 @@
+<odoo>
+    <data noupdate="1">
+        <record id="sd_ocultar_valoracion_archivados_" model="ir.rule">
+            <field name="name">Ocultar Valoracion archivados</field>
+            <field name="model_id" ref="stock_account.model_stock_valuation_layer"/>
+<!--            <field name="groups" eval="[(4, ref('st_modulo_beta.data_grupo_Tienda_Huayna'))]"/>-->
+            <field name="domain_force">[('archivado','=',False)]</field>
+            <field name="perm_read">True</field>
+            <field name="perm_write">True</field>
+            <field name="perm_create">True</field>
+            <field name="perm_unlink">True</field>
+        </record>
+    </data>
+</odoo>

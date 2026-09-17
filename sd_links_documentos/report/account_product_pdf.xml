@@ -1,0 +1,118 @@
+<odoo>
+    <data>
+        <!-- QWeb Reports -->
+        <!-- NAME & FILE_NAME should be the same -->
+                <report
+                    id="kardex_product_report_pdf"
+                    model="kardex.report"
+                    report_type="qweb-pdf"
+                    string="KARDEX FISICO VALORADO"
+                    name="st_kardex.kardex_valuate_pdf_report"
+                    file="st_kardex.kardex_valuate_pdf_report"
+
+                />
+
+        <template id="kardex_valuate_pdf_report">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.internal_layout">
+                        <div class="page">
+                            <center><h2>"KARDEX FISICO VALORADO INVENTARIO"</h2></center>
+                            <br></br>
+                            <div class="row mt32 mb32">
+                                <div style="width:33.33%;">
+                                    <t t-if="o.date_start">
+                                        <strong>Fecha de :</strong>
+                                    <p>
+                                        <span t-esc="o.date_start"/>
+                                    </p>
+                                    </t>
+                                    <t t-if="o.categ_id">
+                                    <br>
+                                        <strong>Categoria de Producto:</strong>
+                                        <t t-foreach='o.categ_id' t-as='line'>
+                                        <th><t t-esc="', '.join(['' or line.name])"/></th>
+<!--                                        <t t-esc="l.name"/>-->
+                                        </t>
+                                    </br>
+                                    </t>
+                                </div>
+                                <div style="width:33.33%;">
+                                    <t t-if="o.date_end">
+                                        <strong>Fecha hasta :</strong>
+                                    <p>
+                                        <span t-esc="o.date_end"/>
+                                    </p>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <table style="width:2400px" class="table table-striped">
+                                    <thead class="thead-blue">
+                                        <tr>
+<!--                                            <th>Producto</th>-->
+                                            <th>Fecha de Movimiento</th>
+                                            <th>Codigo de Transferencia</th>
+                                            <th>Ingresos</th>
+                                            <th>Salidas</th>
+                                            <th>Saldo Ing/Sald</th>
+                                            <th>Ingresos en Bs</th>
+                                            <th>Salidas en Bs</th>
+                                            <th>Saldo In/Sal en Bs</th>
+                                            <th>Costo Unitario</th>
+                                        </tr>
+                                    </thead>
+                                <tbody>
+<!--                                    <t t-set="product_category" t-value="[]"/>-->
+<!--                                        <t t-foreach="o.order_line" t-as="l">-->
+<!--                                            <t t-set="product_category" t-value="product_category+[l.product_id.categ_id]"/>-->
+<!--                                        </t>-->
+<!--                        -->
+<!--                                    <t t-foreach="set(product_category)" t-as="category">-->
+<!--                                        <div><strong t-esc="category.name"/></div>-->
+<!--                                        <t t-foreach="o.order_line" t-as="l">-->
+<!--                                            <t t-if="category.id==l.product_id.categ_id.id">-->
+<!--                                                    <div><span t-field="l.product_id"/></div>-->
+<!--                                            </t>-->
+<!--                                        </t>-->
+<!--                                    </t>-->
+                                    <t t-foreach='o.report_lines_ids' t-as='line'>
+                                            <tr style="width:2400px">
+<!--                                                <t t-set="product_name" t-value="[]"/>-->
+<!--                                                <t t-set="product_name" t-value="product_name+[line.product_id]"/>-->
+<!--                                                <t t-foreach="set(product_name)" t-as="product">-->
+<!--                                                    <div><strong t-esc="product"/></div>-->
+<!--    &lt;!&ndash;                                                <t t-foreach="o.report_lines_ids" t-as="l">&ndash;&gt;-->
+<!--                                                        <t t-if="product==line.product_id">-->
+<!--                                                                <div><span t-field="line.product_id"/></div>-->
+<!--                                                    </t>-->
+<!--&lt;!&ndash;                                                </t>&ndash;&gt;-->
+<!--                                                </t>-->
+                                            <th><t t-esc="line.date"/></th>
+                                            <th><t t-esc="line.reference_id"/></th>
+<!--                                            <th><t t-esc="line.product_id"/></th>-->
+                                            <th><t t-esc="line.start_id"/></th>
+                                            <th><t t-esc="line.exit_id"/></th>
+                                            <th><t t-esc="line.saldo_id"/></th>
+                                            <th><t t-esc="line.ing_bs"/></th>
+<!--                                            <th><t t-esc="line.journal_id"/></th>-->
+                                            <th><t t-esc="line.sal_bs"/></th>
+                                            <th><t t-esc="line.sal_ingsal"/></th>
+                                            <th><t t-esc="line.cost_unit"/></th>
+
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                            </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+        <record id="kardex_product_report_pdf" model="ir.actions.report">
+            <field name="paperformat_id" ref="account_product_paperformat"/>
+        </record>
+
+    </data>
+</odoo>

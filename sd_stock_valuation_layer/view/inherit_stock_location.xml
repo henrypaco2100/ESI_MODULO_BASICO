@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de ajuste de inventario line-->
+<odoo>
+    <record model="ir.ui.view" id="sd_stock_location_inherit_journal">
+            <field name="name">sd.stock.location.inherit.journal</field>
+            <field name="model">stock.location</field>
+            <field name="inherit_id" ref="stock.view_location_form"/>
+            <field name="arch" type="xml">
+                <field name="return_location" position="after">
+                    <field name="journal_id"/>
+                </field>
+            </field>
+    </record>
+</odoo>

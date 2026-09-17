@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record  id="sd_action_vistas_management_company" model="ir.actions.act_window">
+            <field name="name">Gestiones de Compañia</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">management.company</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_sd_group_management_company_stated': 1}</field>
+<!--            <field name="domain">[('state','=','cancel')]</field>-->
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Crear Formulario Gestion de Compañia
+                </p>
+            </field>
+		</record >
+        <record id="sd_tree_management_company_order" model="ir.ui.view">
+			<field name="name">sd.tree.management.company.order</field>
+			<field name="model">management.company</field>
+			<field name="arch" type="xml">
+				<tree>
+                    <field name="name"/>
+                    <field name="company_id"/>
+					<field name="sd_date" />
+                    <field name="sd_date_end"/>
+                    <field name="sd_description"/>
+                    <field name="state"/>
+				</tree>
+			</field>
+		</record>
+        <record id="sd_form_management_company_order" model="ir.ui.view">
+			<field name="name">sd.form.management.company.order</field>
+			<field name="model">management.company</field>
+			<field name="arch" type="xml">
+                <form  string="Gestiones Compañia" class="o_sale_order">
+                    <header>
+                        <button name="action_confirm_management_active" type="object" string="Activar Gestion"
+                                class="btn-primary" states="draft"
+                                groups="sd_stock_valuation_layer.sd_grupo_permiso_administrar_management_company"/>
+
+                        <button name="action_closed_management" type="object" string="Finalizar Gestion" states="active"
+                                groups="sd_stock_valuation_layer.sd_grupo_permiso_administrar_management_company"
+                                confirm='¿Esta seguro que desea "Finalizar" esta Gestion? '/>
+                        <button name="action_cancel_management" type="object" string="Cancelar" states="draft"
+                                groups="sd_stock_valuation_layer.sd_grupo_permiso_administrar_management_company"
+                                confirm='¿Esta seguro que desea "Cancelar" esta Gestion? '/>
+
+                        <!--   ESTADOS-->
+                        <field name="state" widget="statusbar" statusbar_visible="draft,active,closed"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" attrs="{'readonly': [('state', 'in', ('active','cancel','closed'))]}"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <group>
+                                <field name="sd_description" attrs="{'readonly': [('state', 'in', ('active','cancel','closed'))]}"/>
+                                <field name="sd_date" attrs="{'readonly': [('state', 'in', ('active','cancel','closed'))]}"/>
+                            </group>
+                            <group >
+                                <field name="company_id" widget="many2many_tags" attrs="{'readonly': [('state', 'in', ('active','cancel','closed'))]}"/>
+                                <field name="sd_date_end" attrs="{'readonly': [('state', 'in', ('cancel','closed'))]}"/>
+                            </group>
+                        </group>
+
+                    </sheet>
+                </form>
+			</field>
+		</record>
+        <record id="sd_view_management_company_filter" model="ir.ui.view">
+            <field name="name">sd.view.management.company.filter</field>
+            <field name="model">management.company</field>
+            <field name="priority" eval="15"/>
+            <field name="arch" type="xml">
+                <search string="Busqueda Gestiones">
+                    <field name="name" string="Nombre"/>
+                    <field name="sd_description" string="Descripcion"/>
+                    <field name="company_id" string="Compañia"/>
+                    <filter string="Gestiones Activadas/Actuales" domain="[('state', '=', 'active')]" name="estado_active_gestion"/>
+                    <filter string="Gestiones Finalizadas" domain="[('state', '=', 'closed')]" name="estado_management_closed"/>
+                    <filter string="Cancelados" domain="[('state', '=', 'cancel')]" name="estado_gestion_canceladas"/>
+                    <filter string="Borrador" domain="[('state', '=', 'draft')]" name="estado_gestion_borrador"/>
+
+                    <group expand="0" string="Group By">
+                        <filter string="Compañia" name="sd_group_company_management_company" domain="[]" context="{'group_by': 'company_id'}"/>
+                        <filter name="sd_group_management_company_stated" string="Estado" domain="[]" context="{'group_by': 'state'}"/>
+                        <filter string="Fecha Inicial" name="sd_fecha_apertura_despacho_search" domain="[]" context="{'group_by': 'sd_date'}"/>
+                    </group>
+               </search>
+            </field>
+        </record>
+        <menuitem id="sd_menu_management_company" name="Gestiones" parent="base.menu_users"
+        action="sd_action_vistas_management_company"
+        groups="sd_stock_valuation_layer.sd_grupo_permiso_administrar_management_company"/>
+    </data>
+</odoo>

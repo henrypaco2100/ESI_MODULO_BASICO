@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record model='ir.ui.view' id='sd_form_wizard_form_movimiento_existencia'>
+            <field name="name">form wizard form movimientos existencia</field>
+            <field name="model">wizard.reprocesar</field>
+            <field name="arch" type="xml">
+                <form string="Reprocesar">
+                        <group>
+                            <field name="sd_fecha_inicio"/>
+                            <p>-    Vuelve a Reprocesar todos los movimientos de productos<br/>
+                               -   Soluciona problemas del Informe de inventario, Valoracion y asientos contables de todos los Movimientos realizados<br/>
+                               ¿Esta seguro que desea Continuar?</p>
+                        </group>
+                    <footer>
+                        <button name="realizar_valoracion_wizard" type="object"
+                                string="Reprocesar" class="btn btn-primary"/>
+                        <button string="Cancelar" class="oe_link" special="cancel"   />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record model='ir.actions.act_window' id='sd_action_wizard_reprocesar'>
+            <field name="name">Reprocesar</field>
+            <field name="res_model">wizard.reprocesar</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="sd_form_wizard_form_movimiento_existencia"/>
+            <field name="target">new</field>
+        </record>
+        <menuitem id='sd_menu_item_reprocesar_movimiento_existencia' name='Reprocesar' sequence="100" parent="stock.menu_warehouse_report"
+              action="sd_action_wizard_reprocesar" groups="sd_stock_valuation_layer.sd_grupo_permiso_reprocesar_movimientos_existencia"/>
+
+    </data>
+
+</odoo>
