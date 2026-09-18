@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="payment_journal_pdf_report_pagos">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="account_payment">
+                <t t-call="esi_sd_comprobantes_contable.sd_internal_layout_account_payment_comprobantes_contable">
+                    <div class="header" style="border:1px solid #000000;font-size: 12px; height:130px">
+                        <div style="width:40%; height:15px;margin-left:1%;float:left">
+                            <strong><p><span t-esc="account_payment.company_id.name"/></p></strong>
+                        </div>
+                        <div style="width:30%; height:15px;float:left">
+                            <p>Nit:<span style="width:100%; height:50%" t-esc="account_payment.company_id.partner_id.vat"/></p>
+                        </div>
+                        <div style="width:25%; height:14px;float:right;margin-top:1px;margin-right:2px">
+                            <center style="text-align:right;">Página <span class="page"/> de <span class="topage"/></center>
+                        </div>
+                        <div style="width:100%; height:35px;font-size: 18px;font-weight: bold;">
+                            <center><p t-esc="account_payment.get_title_report_comprobante()"/></center>
+                        </div>
+                        <br/>
+                        <div style="width:100%; height:20px;">
+                            <div style="width:40%; height:100%;float:left;margin-left:1%;">
+                                <div>FECHA: <span t-esc="account_payment.fecha_a_palabras()"/></div>
+                            </div>
+                            <div style="width:30%; height:100%;float:left;">
+                                <div>Expresado en <span t-esc="account_payment.currency_id.currency_unit_label"/></div>
+                            </div>
+                            <div style="width:15%; height:100%;float:right;text-align:right;margin-right:2px">
+                                <span t-esc="account_payment.env.user.partner_id.name"/>
+                            </div>
+                        </div>
+                        <div style="width:100%; height:35px;">
+                            <div style="width:50%; height:100%;float:left;margin-left:1%;line-height:95%">
+                                <t t-if="account_payment.payment_type == 'inbound' ">
+                                    <div>RECIBIDO DE: <span t-esc="account_payment.partner_id.name"/></div>
+                                </t>
+                                <t t-if="account_payment.payment_type == 'outbound' ">
+                                    <div>PAGADO A: <span t-esc="account_payment.partner_id.name"/></div>
+                                </t>
+                                <t t-if="account_payment.payment_type == 'transfer' ">
+                                    <div>POR CONCEPTO DE: <span t-esc="account_payment.partner_id.name"/></div>
+                                </t>
+                            </div>
+                            <div style="width:30%; height:50%;float:left;margin-left:5%">
+                                <div><span t-esc="account_payment.payment_method_id.name"/>:</div>
+                            </div>
+                            <div style="width:30%; height:50%;float:left;margin-left:5%">
+                                <div>T/C: <span t-esc="account_payment.get_tasa_cambio()"/></div>
+                            </div>
+                        </div>
+                        <div style="width:100%; height:20px;float:left;font-size: 12px;border-top:1px solid #000000;text-align: center;">
+                            <div style="width:32%;float:left;padding-left:1%;height:100%;border-right:1px solid #000000;"><div>CUENTA</div></div>
+                            <div style="width:44%;float:left;padding-left:1%;height:100%;border-right:1px solid #000000;"><div>GLOSA</div></div>
+                            <div style="width:12%;float:left;height:100%;padding-right:1%;border-right:1px solid #000000"><div>DEBE</div></div>
+                            <div style="width:12%;float:right;padding-right:1%;height:100%"><div>HABER</div></div>
+                        </div>
+                    </div>
+                    <div class="page" style="border-left:1px solid #000000;border-right:1px solid #000000;">
+                        <t t-foreach="account_payment.move_line_ids" t-as="line">
+                            <div style="width:100%; height:45px;font-size: 12px;text-transform: uppercase;line-height:96%;">
+                                <div style="width:32%;float:left;padding-left:1%;height:100%;border-right:1px solid #000000;"><p><span t-att-style="style" t-esc="line.account_id.display_name"/></p></div>
+                                <div style="width:44%;float:left;height:100%;padding-left:1%;border-right:1px solid #000000;"><p><span t-att-style="style" t-esc="line.name"/></p></div>
+                                <div style="width:12%;float:left;height:100%;padding-right:1%;border-right:1px solid #000000;text-align: right;"><p><span t-att-style="style" t-esc="line.debit" t-options='{"widget": "float", "precision": 2}'/></p></div>
+                                <div style="width:12%;float:right;height:100%;padding-right:1%;text-align: right;"><p><span t-att-style="style" t-esc="line.credit" t-options='{"widget": "float", "precision": 2}'/></p></div>
+                            </div>
+                        </t>
+                        <t t-foreach="account_payment.get_return_total_linea_add()" t-as="item">
+                            <div style="width:100%; height:45.5px;font-size: 12px">
+                                <div style="width:32%;float:left;padding-left:1%;height:100%;border-right:1px solid #000000;"></div>
+                                <div style="width:44%;float:left;padding-left:1%;height:100%;border-right:1px solid #000000;"></div>
+                                <div style="width:12%;float:left;padding-right:1%;height:100%;border-right:1px solid #000000;"></div>
+                                <div style="width:12%;float:right;padding-right:1%;height:100%;"></div>
+                            </div>
+                        </t>
+                    </div>
+                    <div class="footer" style="border:1px solid #000000;">
+                        <div style="width:100%; height:125px;font-size: 12px;border-bottom:1px solid #000000">
+                            <div style="width:76%;float:left;height:100%;border-right:1px solid #000000;padding-left:1%;padding-right:1%;">
+                                <div style="width:90%;height:34%;float:left">SON: <span t-esc="account_payment.numero_to_letras(account_payment.result_total_debit())"/></div>
+                                <div style="width:10%;height:17%;float:right;text-align: right;"> Total Bs.</div>
+                                <div style="width:10%;height:17%;float:right;text-align: right;"> Total $us.</div>
+                                <div style="width:90%;height:34%;float:left">DESCRIPCION: <span t-esc="account_payment.communication"/></div>
+                            </div>
+                            <div style="width:12%;float:left;height:100%;border-right:1px solid #000000;padding-right:1%;text-align:right;"><span t-esc="account_payment.result_total_debit()" t-options='{"widget": "float", "precision": 2}'/></div>
+                            <div style="width:12%;float:right;height:100%;text-align:right;padding-right:1%;"><span t-esc="account_payment.result_total_credit()" t-options='{"widget": "float", "precision": 2}'/></div>
+                        </div>
+                        <t t-if="account_payment.payment_type in ('inbound','transfer')">
+                            <div style="width:100%; height:125px;font-size: 12px">
+                                <div style="width:25%;float:left;height:85%;border:1px solid #85929E;margin-left:70px;margin-top:10px;margin-bottom:2px;border-radius: 2px;">
+                                    <div style="width:96%; height:80%;border-bottom:1px solid #000000;margin-left:2%;margin-right:2%"></div>
+                                    <div style="width:100%; height:20%;font-size: 12px;"><center>ELABORADO POR</center></div>
+                                </div>
+                                <div style="width:25%;float:left;height:85%;border:1px solid #85929E;margin-left:35px;margin-top:10px;margin-bottom:2px;border-radius: 2px;">
+                                    <div style="width:96%; height:80%;border-bottom:1px solid #000000;margin-left:2%;margin-right:2%"></div>
+                                    <div style="width:100%; height:20%;font-size: 12px;"><center>REVISADO POR</center></div>
+                                </div>
+                                <div style="width:25%;float:left;height:85%;border:1px solid #85929E;margin-left:35px;margin-top:10px;margin-bottom:2px;border-radius: 2px;">
+                                    <div style="width:96%; height:80%;border-bottom:1px solid #000000;margin-left:2%;margin-right:2%"></div>
+                                    <div style="width:100%; height:20%;font-size: 12px;"><center>APROBADO POR</center></div>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-if="account_payment.payment_type == 'outbound'">
+                            <div style="width:100%; height:125px;font-size: 12px">
+                                <div style="width:24%;float:left;height:85%;border:1px solid #85929E;margin-left:4px;margin-top:10px;margin-bottom:2px;border-radius: 2px;">
+                                    <div style="width:96%; height:80%;border-bottom:1px solid #000000;margin-left:2%;margin-right:2%"></div>
+                                    <div style="width:100%; height:20%;font-size: 12px;"><center>ELABORADO POR</center></div>
+                                </div>
+                                <div style="width:25%;float:left;height:85%;border:1px solid #85929E;margin-left:4px;margin-top:10px;margin-bottom:2px;border-radius: 2px;">
+                                    <div style="width:96%; height:80%;border-bottom:1px solid #000000;margin-left:2%;margin-right:2%"></div>
+                                    <div style="width:100%; height:20%;font-size: 12px;"><center>REVISADO POR</center></div>
+                                </div>
+                                <div style="width:25%;float:left;height:85%;border:1px solid #85929E;margin-left:4px;margin-top:10px;margin-bottom:2px;border-radius: 2px;">
+                                    <div style="width:96%; height:80%;border-bottom:1px solid #000000;margin-left:2%;margin-right:2%"></div>
+                                    <div style="width:100%; height:20%;font-size: 12px;"><center>APROBADO POR</center></div>
+                                </div>
+                                <div style="width:24%;float:right;height:85%;border:1px solid #85929E;margin-right:4px;margin-top:10px;margin-bottom:2px;border-radius: 2px;">
+                                    <div style="width:96%; height:80%;border-bottom:1px solid #000000;margin-left:2%;margin-right:2%">
+                                        <div style="width:100%; height:25%;"><div style="width:30%; height:68%;float:left;text-align:right;margin-top:3%;">Nombre:</div><div style="width:65%;height:100%;margin-right:4%;float:right;border-bottom:1px solid #000000;"></div></div>
+                                        <div style="width:100%; height:25%;"><div style="width:30%;height:68%;float:left;text-align:right;margin-top:3%;">CI:</div><div style="width:65%;height:100%;margin-right:4%;border-bottom:1px solid #000000;float:right;"></div></div>
+                                    </div>
+                                    <div style="width:100%; height:20%;font-size: 12px;"><center>RECIBI CONFORME</center></div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    <record id="sd_reporte_formato_papel_account_payment_comprobante" model="report.paperformat">
+        <field name="name">Comprobante contable</field>
+        <field name="default" eval="True" />
+        <field name="format">Letter</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">61</field>
+        <field name="margin_bottom">85</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">28</field>
+        <field name="dpi">96</field>
+        <field name="report_ids" eval="[(4, ref('esi_sd_comprobantes_contable.sd_action_account_payment_comprobantes'))]"/>
+    </record>
+</odoo>

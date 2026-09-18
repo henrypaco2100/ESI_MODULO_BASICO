@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de Factura-->
+<odoo>
+    <data>
+<!--        <record models="ir.rule" id="account_move_ocultar_button_create">-->
+<!--            <field name="name">condificional.para.ocultar.create</field>-->
+<!--            <field name="model_id" ref="nombre_nuevo_Del_modelo"/>-->
+<!--            <field eval="1" name="perm_create"/>-->
+<!--            <field name="domain_force">[ ('state','=',['done'])]</field>-->
+<!--        </record>-->
+        <!-- ocultar buttom "crear" del formulario Factura-->
+<!--        <record id="account_move_hide_form_create" model="ir.ui.view">-->
+<!--            <field name="name">account.move.hide.form.create</field>-->
+<!--            <field name="model">account.move</field>-->
+<!--            <field name="inherit_id" ref="account.view_move_form"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <xpath expr="/form" position="attributes">-->
+<!--                    <attribute name="create">false</attribute>-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--        </record>-->
+<!--        <record id="account_move_mostrar_el_campo_journal_id" model="ir.ui.view">-->
+<!--            <field name="name">account.move.show_hide_journal_id</field>-->
+<!--            <field name="model">account.move</field>-->
+<!--            <field name="inherit_id" ref="account.view_move_form"/>-->
+<!--            <field name="arch" type="xml">-->
+<!--                <xpath expr="//field[@name='journal_id']" position="attributes">-->
+<!--                    <attribute name='groups'>account.group_account_user,__import__.auxiliar_usuario_venta_compra_inocomsrl</attribute>-->
+<!--                </xpath>-->
+<!--                <xpath expr="//button[@name='preview_invoice']" position="attributes">-->
+<!--                    <attribute name="invisible">1</attribute>-->
+<!--                </xpath>-->
+<!--                <xpath expr="//button[@name='button_draft']" position="attributes">-->
+<!--                    <attribute name='groups'>__import__.Administracion_total_inocom_prueba,account.group_account_manager</attribute>-->
+<!--                    <attribute name="invisible">1</attribute>-->
+<!--                </xpath>-->
+<!--                <xpath expr="//button[@name='action_reverse']" position="attributes">-->
+<!--                    <attribute name='groups'>__import__.Administracion_total_inocom_prueba,account.group_account_manager</attribute>-->
+<!--                    <attribute name="invisible">1</attribute>-->
+<!--                </xpath>-->
+<!--                <xpath expr="//button[@name='button_cancel']" position="attributes">-->
+<!--                    <attribute name='groups'>__import__.Administracion_total_inocom_prueba,account.group_account_manager</attribute>-->
+<!--                </xpath>-->
+<!--            </field>-->
+<!--            </record>-->
+    </data>
+</odoo>

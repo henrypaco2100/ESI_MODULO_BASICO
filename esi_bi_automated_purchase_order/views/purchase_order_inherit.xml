@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sd_purchase_presupuesto_order_filter_inherit_v13" model="ir.ui.view">
+        <field name="name">purchase.order.filter.tipo.compra.esi</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <field name="partner_id" position="after">
+                <field name="work_process_order_id" string="Tipo de Compra"/>
+            </field>
+            <group position="inside">
+                <filter string="Tipo de Compra" name="tipo_compra_sd" domain="[]" context="{'group_by': 'work_process_order_id'}"/>
+            </group>
+        </field>
+    </record>
+</odoo>

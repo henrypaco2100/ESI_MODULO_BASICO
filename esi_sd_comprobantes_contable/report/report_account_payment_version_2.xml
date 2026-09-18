@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="sd_report_account_payment_version_2">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="account_payment">
+                <t t-call="esi_sd_comprobantes_contable.sd_internal_layout_account_payment_version_2">
+                    <div class="header" style="font-size: 12px; position:relative; height:130">
+                        <div style="width:100%; height:100%">
+                            <div class="row" style="width:100%; height:50%">
+                                <div style="width:3%"/>
+                                <div style="width:50%; height:100%">
+                                    <img t-attf-src="data:image/png;base64,{{account_payment.company_id.logo}}" height="100px" width="100px" alt="Red dot"/>
+                                </div>
+                                <div style="width: 48%; height: 100%; font-size:14px" align="right">
+                                    <div><strong><span t-esc="account_payment.company_id.name"/></strong></div>
+                                    <div><strong>NIT: <span t-esc="account_payment.company_id.partner_id.vat"/></strong></div>
+                                    <div><strong><span t-esc="account_payment.company_id.street"/></strong></div>
+                                    <div><strong>Tel: <span t-esc="account_payment.company_id.phone"/></strong></div>
+                                    <div>
+                                        <t t-if="account_payment.company_id.city != ''">
+                                            <strong><span t-esc="account_payment.company_id.city"/> - </strong>
+                                        </t>
+                                        <strong><span t-esc="account_payment.company_id.country_id.name"/></strong>
+                                    </div>
+                                </div>
+                                <div style="width: 3%"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="page">
+                        <div style="width: 100%; height: 150px">
+                            <center><u><div style="font-size: 20px" t-esc="account_payment.get_title_report_comprobante()"/></u></center>
+                            <div style="height: 10px"/>
+                            <div class="row" style="font-size: 14px">
+                                <div style="width: 49%">
+                                    <div class="row">
+                                        <div style="width: 30%" align="right">FECHA: </div>
+                                        <div style="width: 4%"/>
+                                        <div style="width: 66%"><strong><span t-esc="account_payment.fecha_a_palabras()"/></strong></div>
+                                    </div>
+                                    <div class="row">
+                                        <div style="width: 30%" align="right">USUARIO: </div>
+                                        <div style="width: 4%"/>
+                                        <div style="width: 66%"><strong><span t-esc="env.user.name"/></strong></div>
+                                    </div>
+                                    <div class="row">
+                                        <div style="width: 30%" align="right">SEÑORES: </div>
+                                        <div style="width: 4%"/>
+                                        <div style="width: 66%"><strong><span t-esc="account_payment.partner_id.name"/></strong></div>
+                                    </div>
+                                    <t t-if="account_payment.has_store_id() == True">
+                                        <div class="row">
+                                          <div style="width: 30%" align="right">TIENDA: </div>
+                                          <div style="width: 4%"/>
+                                          <div style="width: 66%"><strong t-esc="account_payment.journal_id.store_id.name"></strong></div>
+                                        </div>
+                                    </t>
+                                    <div class="row">
+                                        <div style="width: 30%" align="right">GLOSA: </div>
+                                        <div style="width: 4%"/>
+                                        <div style="width: 160%"><strong><span t-esc="account_payment.communication"/></strong></div>
+                                    </div>
+                                </div>
+                                <div style="width: 2%"/>
+                                <div style="width: 49%">
+                                    <div class="row">
+                                        <div style="width: 30%" align="right">TIPO: </div>
+                                        <div style="width: 4%"/>
+                                        <div style="width: 66%"><strong><span t-esc="account_payment.journal_id.name"/></strong></div>
+                                    </div>
+                                    <div class="row">
+                                        <div style="width: 30%" align="right">NUMERO: </div>
+                                        <div style="width: 4%"/>
+                                        <div style="width: 66%"><strong><div t-esc="account_payment.name"/></strong></div>
+                                    </div>
+                                    <div class="row">
+                                        <div style="width: 30%" align="right">CHEQUE: </div>
+                                        <div style="width: 4%"/>
+                                        <div style="width: 66%"></div>
+                                    </div>
+                                    <div class="row">
+                                        <div style="width: 30%" align="right">IMPORTE: </div>
+                                        <div style="width: 4%"/>
+                                        <div style="width: 66%"><strong><span t-esc="account_payment.result_total_debit2()"/></strong></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br/>
+                        <div style="height: 20px"/>
+                        <table class="table table-sm table-bordered" style="font-size: 14px">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="border-dark" style="text-align: center" scope="col" width="30%">CUENTA</th>
+                                    <th class="border-dark" style="text-align: center" scope="col" width="40%">GLOSA</th>
+                                    <th class="border-dark" style="text-align: center" scope="col" width="15%">DEBE</th>
+                                    <th class="border-dark" style="text-align: center" scope="col" width="15%">HABER</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="account_payment.move_line_ids" t-as="line">
+                                    <tr>
+                                        <td class="border-dark"><span t-att-style="style" t-esc="line.account_id.display_name"/></td>
+                                        <td class="border-dark"><span t-att-style="style" t-esc="line.name"/></td>
+                                        <td class="border-dark" style="text-align: right"><span t-esc="line.debit" t-options='{"widget": "float", "precision": 2}'/></td>
+                                        <td class="border-dark" style="text-align: right"><span t-esc="line.credit" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                            <tfoot>
+                                <tr class="thead-light" style="font-size: 14px">
+                                    <th class="border-dark" colspan="2">
+                                        <div class="row">
+                                            <div style="width: 3%"/>
+                                            <div style="width: 15%">TOTAL</div>
+                                            <div style="width: 5%"/>
+                                            <div style="width: 55%"><center>SON: <span t-esc="account_payment.numero_to_letras(account_payment.result_total_debit())"/></center></div>
+                                            <div style="width: 5%"/>
+                                            <div style="width: 15%" align="right"><div>Total Bs.</div></div>
+                                            <div style="width: 3%"/>
+                                        </div>
+                                    </th>
+                                    <th class="border-dark" style="text-align: right; font-size: 14px"><span t-esc="account_payment.result_total_debit2()"/></th>
+                                    <th class="border-dark" style="text-align: right; font-size: 14px"><span t-esc="account_payment.result_total_credit()"/></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <div style="height: 15px"/>
+                        <div class="row" style="width: 100%; height: 175px; font-size: 14px; page-break-inside: avoid">
+                            <div style="width: 20%; height: 100%">
+                                <div style="width: 100%; height: 90%"></div>
+                                <div style="width: 100%; height: 10%"><center><strong>ELABORADO</strong></center></div>
+                            </div>
+                            <div style="width: 20%; height: 100%">
+                                <div style="width: 100%; height: 90%"></div>
+                                <div style="width: 100%; height: 10%"><center><strong>REVISADO</strong></center></div>
+                            </div>
+                            <div style="width: 20%; height: 100%">
+                                <div style="width: 100%; height: 90%"></div>
+                                <div style="width: 100%; height: 10%"><center><strong>AUTORIZADO</strong></center></div>
+                            </div>
+                            <div style="width: 40%; height: 100%">
+                                <div style="width: 100%; height: 10%"><center><strong>CONFORMIDAD</strong></center></div>
+                                <div style="width: 100%; height: 90%">
+                                    <div style="height: 30%"/>
+                                    <div class="row" style="height: 30%">
+                                        <div style="width: 25%" align="right">Firma: </div>
+                                        <div style="width: 10%"/>
+                                        <div style="width:55%"><div style="height: 14px ;border-bottom:1px solid #000000"/></div>
+                                    </div>
+                                    <div class="row" style="height: 30%">
+                                        <div style="width: 25%" align="right">Aclaracion:</div>
+                                        <div style="width: 10%"/>
+                                        <div style="width:55%"><div style="height: 14px ;border-bottom:1px solid #000000"/></div>
+                                    </div>
+                                    <div class="row" style="height: 10%">
+                                        <div style="width: 25%" align="right">Documento: </div>
+                                        <div style="width: 10%"/>
+                                        <div style="width:55%"><div style="height: 14px ;border-bottom:1px solid #000000"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="footer" style="position:relative;z-index:10">
+                        <div style="height: 10px"/>
+                        <div style="width: 100%; height:200px">
+                            <div><div style="width: 100%; border-top:1px solid #000000"><center>Página: <span class="page"/> / <span class="topage"/></center></div></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+    <record id="sd_reporte_formato_papel_account_payment_version_2" model="report.paperformat">
+        <field name="name">Comprobante contable</field>
+        <field name="default" eval="True" />
+        <field name="format">Letter</field>
+        <field name="page_height">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">35</field>
+        <field name="margin_bottom">20</field>
+        <field name="margin_left">5</field>
+        <field name="margin_right">5</field>
+        <field name="header_line" eval="False" />
+        <field name="header_spacing">30</field>
+        <field name="dpi">96</field>
+        <field name="report_ids" eval="[(4, ref('esi_sd_comprobantes_contable.sd_action_account_payment_version_2'))]"/>
+    </record>
+</odoo>

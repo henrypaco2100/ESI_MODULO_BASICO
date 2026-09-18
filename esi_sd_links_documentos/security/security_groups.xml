@@ -1,0 +1,12 @@
+<odoo>
+    <data>
+        <record id="account_reporting_cat" model="ir.module.category">
+            <field name="name">Account Reporting</field>
+            <field name="sequence" eval="1"/>
+        </record>
+        <record id="account_product_reporter" model="res.groups">
+            <field name="name">Product Reporter</field>
+            <field name="category_id" ref="account_reporting_cat"/>
+        </record>
+    </data>
+</odoo>

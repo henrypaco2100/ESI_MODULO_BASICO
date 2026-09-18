@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sd_inherit_form_automated_sale_and_purchase" model="ir.ui.view">
+        <field name="name">account.move.automated.purchase.legacy.inactive</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="active" eval="False"/>
+        <field name="arch" type="xml">
+            <field name="ref" position="attributes"><attribute name="placeholder"> </attribute></field>
+        </field>
+    </record>
+
+    <record id="sd_account_move_facturacion_bolivia_heredar_campos_compra" model="ir.ui.view">
+        <field name="name">account.move.facturacion.purchase.legacy.inactive</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="active" eval="False"/>
+        <field name="arch" type="xml">
+            <field name="ref" position="attributes"><attribute name="placeholder"> </attribute></field>
+        </field>
+    </record>
+
+    <record id="sd_account_move__filter_inherit__v13" model="ir.ui.view">
+        <field name="name">account.move.filter.purchase.legacy.inactive</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="active" eval="False"/>
+        <field name="arch" type="xml">
+            <field name="name" position="attributes"><attribute name="string">Número</attribute></field>
+        </field>
+    </record>
+
+    <record id="sd_account_move_tree_facturacion_en_linea_compra" model="ir.ui.view">
+        <field name="name">account.move.tree.purchase.legacy.inactive</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="active" eval="False"/>
+        <field name="arch" type="xml">
+            <field name="name" position="attributes"><attribute name="readonly">1</attribute></field>
+        </field>
+    </record>
+</odoo>

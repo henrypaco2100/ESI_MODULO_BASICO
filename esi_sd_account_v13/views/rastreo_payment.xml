@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record  id="sd_action_arbol_rastreo_payment" model="ir.actions.act_window">
+                <field name="name">Rastreo Pagos</field>
+                <field name="type">ir.actions.act_window</field>
+                <field name="res_model">rastreo.payment.origin</field>
+                <field name="view_mode">form</field>
+                <field name="help" type="html">
+                    <p class="o_view_nocontent_smiling_face">
+                        Crear Formulario Rastreo de Pagos
+                    </p>
+                </field>
+        </record>
+        <record id="sd_arbol_rastreo_payment" model="ir.ui.view">
+            <field name="name">arbol.rastreo.payment.origin</field>
+            <field name="model">rastreo.payment.origin</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="model_id"/>
+                    <field name="payment_id"/>
+                    <field name="sd_descripcion"/>
+                    <field name="sd_monto"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="sd_form_rastreo_payment" model="ir.ui.view">
+            <field name="name">fields.form.rastreo.payment.origin</field>
+            <field name="model">rastreo.payment.origin</field>
+            <field name="arch" type="xml">
+                <form>
+<!--                    <div class="oe_title">-->
+<!--                        <h1>-->
+<!--                            <field name="name" readonly="1"/>-->
+<!--                        </h1>-->
+<!--                    </div>-->
+                    <group>
+                        <field name="model_id"/>
+                        <field name="payment_id"/>
+                        <field name="sd_descripcion"/>
+                        <field name="sd_monto"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

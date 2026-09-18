@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+       <record model="ir.ui.view" id="inherit_view_account_move_form">
+        <field name="name">inherit.account.move.form</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                        <field name="sd_tipo" invisible="1"/>
+
+<!--                        COMPRA APARECE EN: ASIENTO PAGO PROVEEDORES, FACTURA COMPRAS-->
+                        <button name="action_get_purchase_moves" icon="fa-signal" class="oe_stat_button"
+                                string="Compra" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'in_invoice')]}"/>
+                        <button name="action_get_purchase_moves" icon="fa-signal" class="oe_stat_button"
+                                string="Compra" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'compra')]}"/>
+                        <button name="action_get_purchase_moves" icon="fa-signal" class="oe_stat_button"
+                                string="Compra" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'pago_proveedor')]}"/>
+
+<!--                        FACTURA CLIENTE APARECE EN: ASIENTO PAGOS DE CLIENTES, VENTAS-->
+<!--                        <button name="action_get_payment_moves_client" icon="fa-pencil-square-o" class="oe_stat_button"-->
+<!--                                string="Factura Cliente" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'venta')]}"/>-->
+                        <button name="action_get_payment_moves_client" icon="fa-pencil-square-o" class="oe_stat_button"
+                                string="Factura Cliente" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'pago_cliente')]}"/>
+
+<!--                        FACTURA PROVEEDOR APARECE EN: COMPRA, ASIENTO PAGO DE PROVEEDORES-->
+<!--                        <button name="action_get_payment_moves_supplier" icon="fa-pencil-square-o" class="oe_stat_button"-->
+<!--                                string="Factura Proveedor" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'compra')]}"/>-->
+                        <button name="action_get_payment_moves_supplier" icon="fa-pencil-square-o" class="oe_stat_button"
+                                string="Factura Proveedor" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'pago_proveedor')]}"/>
+
+<!--                        PAGO CLIENTE APARECE EN: FACTURA CLIENTE, ASIENTO PAGO CLIENTE-->
+                        <button name="action_get_payment" icon="fa-money" class="oe_stat_button"
+                                string="Pagos de Cliente" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'out_invoice')]}"/>
+                        <button name="action_get_payment" icon="fa-money" class="oe_stat_button"
+                                string="Pagos de Cliente" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'pago_cliente')]}"/>
+
+<!--                        PAGO A PROVEEDOR APARECE EN: FACTURA PROVEEDOR, ASIENTO PAGO PROVEEDOR-->
+                        <button name="action_get_payment" icon="fa-money" class="oe_stat_button"
+                                string="Pago a Proveedor" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'in_invoice')]}"/>
+                        <button name="action_get_payment" icon="fa-money" class="oe_stat_button"
+                                string="Pago a Proveedor" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'pago_proveedor')]}"/>
+
+<!--                        <button name="action_get_payment_moves_supplier" icon="fa-usd" class="oe_stat_button"-->
+<!--                                string="Pago Transferencia" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'in_invoice')]}"/>-->
+
+<!--                        PRODUCCION APARECE EN ASIENTOS DE MATERIA PRIMA O PRODUCTO TERMINADO-->
+                        <button name="action_get_production_moves" icon="fa-wrench" class="oe_stat_button"
+                                string="Produccion" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'production')]}"/>
+
+<!--                        PUNTO DE VENTA APARECE EN ASIENTOS DE VENTAS REALIZADAS POR EL PUNTO DE VENTA-->
+                        <button name="action_get_point_of_sale_moves" icon="fa-tag" class="oe_stat_button"
+                                string="Punto de Venta" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'pos')]}"/>
+
+<!--                        VENTA APARECE EN: FACTURA CLIENTES, ASIENTO PAGO DE CLIENTES-->
+                        <button name="action_get_sale_moves" icon="fa-signal" class="oe_stat_button"
+                                string="Venta" type="object" attrs="{'invisible':[('sd_tipo', 'not in', ['out_invoice','venta'] )]}"/>
+                        <button name="action_get_sale_moves" icon="fa-signal" class="oe_stat_button"
+                                string="Venta" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'pago_cliente' )]}"/>
+
+
+
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

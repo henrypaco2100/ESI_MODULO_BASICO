@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sd_form_inherit_stock_move_mejoras">
+             <field name="name">sd_form_inherit_stock_move_mejoras</field>
+             <field name="model">stock.move</field>
+             <field name="inherit_id" ref="stock.view_move_form"/>
+             <field name="arch" type="xml">
+                 <field name="location_dest_id" position="after">
+                     <field name="sd_stock_disponible"/>
+<!--                     <field name="stock_valuation_layer_ids" invisible="1"/>-->
+                 </field>
+             </field>
+        </record>
+    </data>
+</odoo>

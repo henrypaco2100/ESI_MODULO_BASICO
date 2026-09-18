@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sd_form_inherit_account_view">
+             <field name="name">sd.form.inherit.account.view</field>
+             <field name="model">account.group</field>
+             <field name="inherit_id" ref="account.view_account_group_form"/>
+             <field name="arch" type="xml">
+                 <field name="parent_id" position="after">
+                     <field name="sd_analytic_group"/>
+                 </field>
+             </field>
+        </record>
+    </data>
+</odoo>

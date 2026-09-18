@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sd_inherit_form_automated_sale_and_purchase" model="ir.ui.view">
+        <field name="name">account.move.automated.sale.legacy.inactive</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="active" eval="False"/>
+        <field name="arch" type="xml">
+            <field name="ref" position="attributes">
+                <attribute name="placeholder"> </attribute>
+            </field>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="inherit_view_stock_picking_form" model="ir.ui.view">
+            <field name="name">inherit.stock.picking.form</field>
+            <field name="model">stock.picking</field>
+            <field name="inherit_id" ref="stock.view_picking_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@name='button_box']" position="inside">
+                    <field name="sd_tipo" invisible="1"/>
+                    <button name="action_get_stock_picking" icon="fa-exchange" class="oe_stat_button"
+                            string="Movimientos de Productos" type="object"/>
+                    <button name="action_get_purchase_moves" icon="fa-signal" class="oe_stat_button"
+                            string="Compra" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'compra')]}"/>
+                    <button name="action_get_sale_moves" icon="fa-signal" class="oe_stat_button"
+                                string="Venta" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'venta' )]}"/>
+                    <button name="action_get_sale_moves" icon="fa-wrench" class="oe_stat_button"
+                                string="Produccion" type="object" attrs="{'invisible':[('sd_tipo', '!=', 'produccion' )]}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

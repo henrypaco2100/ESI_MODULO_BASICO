@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="inherit_report_inventario" inherit_id="stock.report_inventory">
+            <xpath expr="//td[@groups='stock.group_tracking_lot']" position="after">
+                <td></td>
+                <td></td>
+            </xpath>
+            <xpath expr="//th[@class='text-right']" position="before">
+                <th><strong>Precio Unitario</strong></th>
+            </xpath>
+            <xpath expr="//td[@class='text-right']" position="before">
+                <td><span t-field="line.sd_precio_product"/></td>
+            </xpath>
+        </template>
+    </data>
+</odoo>
+
+
+
+

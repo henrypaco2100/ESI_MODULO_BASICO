@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+       <record model="ir.ui.view" id="inherit_view_account_move_line_form">
+        <field name="name">inherit.account.move.line.form</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_move_line_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='company_id']" position="before">
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_get_account_moves" icon="fa-usd" class="oe_stat_button"
+                                string="Asientos Contables" type="object" groups="account.group_account_user"/>
+
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+    <data>
+       <record model="ir.ui.view" id="sd_view_move_line_tree_inherit_tipo_movimiento">
+        <field name="name">sd.view.move.line.tree.inherit.tipo.movimiento</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_move_line_tree"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="sd_tipo" optional="hide" string="Tipo"/>
+                </field>
+            </field>
+        </record>
+    </data>
+    <data>
+       <record model="ir.ui.view" id="sd_view_move_line_tree_group_inherit_tipo_movimiento">
+        <field name="name">sd.view.move.line.tree.group.inherit.tipo.movimiento</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_move_line_tree_grouped"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="after">
+                    <field name="sd_tipo" optional="hide" string="Tipo"/>
+                </field>
+            </field>
+        </record>
+    </data>
+</odoo>

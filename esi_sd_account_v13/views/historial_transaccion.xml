@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record  id="sd_action_arbol_historial_transaccion" model="ir.actions.act_window">
+                <field name="name">Transaccion</field>
+                <field name="type">ir.actions.act_window</field>
+                <field name="res_model">historial.transaccion</field>
+                <field name="view_mode">tree,form</field>
+                <field name="help" type="html">
+                    <p class="o_view_nocontent_smiling_face">
+                        Crear Formulario Pdf viewer
+                    </p>
+                </field>
+        </record>
+        <record id="sd_arbol_historial_transaccion" model="ir.ui.view">
+            <field name="name">arbol.historial.transaccion</field>
+            <field name="model">historial.transaccion</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <button name="action_view_comprobante_pago" class="oe_highlight" type="object" string="C"/>
+                    <button name="action_view_recibo_pago" class="oe_highlight" type="object" string="R"/>
+                    <button name="action_view_account_payment" class="oe_highlight" type="object" string="P"/>
+                    <field name="sd_gestion"/>
+                    <field name="sd_fecha_emision"/>
+                    <field name="sd_razon_social"/>
+                    <field name="sd_descripcion"/>
+                    <field name="sd_monto"/>
+                </tree>
+            </field>
+        </record>
+        <record id="sd_form_historial_transaccion" model="ir.ui.view">
+            <field name="name">fields.form.historial.transaccion</field>
+            <field name="model">historial.transaccion</field>
+            <field name="arch" type="xml">
+                <form>
+<!--                    <div class="oe_title">-->
+<!--                        <h1>-->
+<!--                            <field name="name" readonly="1"/>-->
+<!--                        </h1>-->
+<!--                    </div>-->
+                    <group>
+                        <group>
+                            <field name="sd_gestion"/>
+                            <field name="sd_fecha_emision"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="sd_descripcion"/>
+                            <field name="sd_monto"/>
+                        </group>
+                    </group>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sd_form_inherit_stock_inventory">
+             <field name="name">sd_form_inherit_stock_inventory</field>
+             <field name="model">stock.inventory</field>
+             <field name="inherit_id" ref="stock.view_inventory_form"/>
+             <field name="arch" type="xml">
+                 <field name="line_ids" position="attributes">
+                     <attribute name="invisible">0</attribute>
+                     <attribute name="groups">base.group_no_one</attribute>
+                 </field>
+<!--                 <xpath exp="//form" position="after">-->
+<!--                     <group>-->
+<!--                         <field name="line_ids" invisible="0" groups="base.group_no_one"/>-->
+<!--                     </group>-->
+<!--                 </xpath>-->
+             </field>
+        </record>
+    </data>
+    <data>
+        <record model="ir.ui.view" id="sd_tree_inherit_stock_inventory_line">
+             <field name="name">sd_tree_inherit_stock_inventory_line</field>
+             <field name="model">stock.inventory.line</field>
+             <field name="inherit_id" ref="stock.stock_inventory_line_tree"/>
+             <field name="arch" type="xml">
+                 <field name="product_qty" position="before">
+                     <field name="sd_precio_product"/>
+                 </field>
+             </field>
+        </record>
+    </data>
+    <data>
+        <record model="ir.ui.view" id="sd_stock_inventory_line_tree_inherit_price_unit_product">
+            <field name="name">sd.stock.inventory.line.tree.inherit.price.unit.product</field>
+            <field name="model">stock.inventory.line</field>
+            <field name="inherit_id" ref="stock.stock_inventory_line_tree2"/>
+            <field name="arch" type="xml">
+                <field name="product_id" position="after">
+                    <field name="sd_precio_product"/>
+                </field>
+            </field>
+    </record>
+    </data>
+</odoo>

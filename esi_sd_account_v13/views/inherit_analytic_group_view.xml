@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de grupos RELACION ENTRE GRUPO DE CUENTA Y GRUPO ANALITICO-->
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sd_inherit_analytic_group_view_form">
+            <field name="name">sd_inherit_analytic_group_view_form</field>
+            <field name="model">account.analytic.group</field>
+            <field name="inherit_id" ref="analytic.account_analytic_group_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="/form/sheet/group/field[@name='name']" position="before">
+                    <field name="sd_codigo"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="sd_inherit_analytic_group_view_tree">
+            <field name="name">sd_inherit_analytic_group_view_tree</field>
+            <field name="model">account.analytic.group</field>
+            <field name="inherit_id" ref="analytic.account_analytic_group_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="/tree/field[@name='name']" position="before">
+                    <field name="sd_codigo"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_account_analytic_group_search" model="ir.ui.view">
+            <field name="name">account.analytic.group.search</field>
+            <field name="model">account.analytic.group</field>
+            <field name="arch" type="xml">
+                <search string="Analytic Group">
+                    <field name="name" filter_domain="[('name', 'ilike', self)]" string="nombre"/>
+                    <field name="sd_codigo"/>
+<!--                    <field name="partner_id"/>-->
+                    <separator/>
+                    <filter string="Archived" domain="[('active', '=', False)]" name="inactive"/>
+                    <group expand="0" string="Group By...">
+                        <filter string="Grupo Principal" name="principal" domain="[]" context="{'group_by': 'parent_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+    </data>
+</odoo>

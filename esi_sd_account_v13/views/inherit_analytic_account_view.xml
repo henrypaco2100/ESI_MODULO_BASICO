@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modificaciones en el Formulario de grupos RELACION ENTRE GRUPO DE CUENTA Y GRUPO ANALITICO-->
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="sd_inherit_analytic_account_view_form">
+            <field name="name">sd_inherit_analytic_account_view_form</field>
+            <field name="model">account.analytic.account</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="/form/sheet/group/group/field[@name='code']" position="before">
+                    <field name="sd_codigo"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="sd_inherit_analytic_account_view_tree">
+            <field name="name">sd_inherit_analytic_account_view_tree</field>
+            <field name="model">account.analytic.account</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_account_list"/>
+            <field name="arch" type="xml">
+                <xpath expr="/tree/field[@name='name']" position="before">
+                    <field name="sd_codigo"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="sd_inherit_analytic_account_search">
+            <field name="name">sd_inherit_analytic_account_search</field>
+            <field name="model">account.analytic.account</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_account_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="/search/field[@name='partner_id']" position="after">
+                    <field name="sd_codigo"/>
+                    <field name="group_id"/>
+                </xpath>
+                <xpath expr="/search/group/filter[@name='associatedpartner']" position="after">
+                    <filter string="Codigo" name="codigo" domain="[]" context="{'group_by': 'sd_codigo'}"/>
+                    <filter string="Grupo" name="grupo" domain="[]" context="{'group_by': 'group_id'}"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

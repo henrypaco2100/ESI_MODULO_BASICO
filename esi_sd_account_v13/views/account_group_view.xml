@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <data>
+        <record  id="sd_action_account_group" model="ir.actions.act_window">
+            <field name="name">Grupos de cuentas</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">account.group</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Grupos de cuentas bancarias
+                </p>
+            </field>
+        </record>
+        <menuitem
+            id="sd_account_grupo"
+            name="Grupos de Cuentas"
+            parent="account.account_account_menu"
+            action="sd_action_account_group"
+            sequence="2"/>
+    </data>
+<!-- Modificaciones en el Formulario de grupos RELACION ENTRE GRUPO DE CUENTA Y GRUPO ANALITICO-->
+
+    <data>
+        <record model="ir.ui.view" id="sd_inherit_account_group_form">
+            <field name="name">sd_inherit_account_group_form</field>
+            <field name="model">account.group</field>
+            <field name="inherit_id" ref="account.view_account_group_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="/form/sheet/group/field[@name='parent_id']" position="after">
+                    <field name="sd_analytic_group"/>
+                </xpath>
+<!--                <field name="parent_id" position="after">-->
+<!--                    <field name="sd_analytic_group"/>-->
+<!--                </field>-->
+            </field>
+        </record>
+    </data>
+
+</odoo>

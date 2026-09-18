@@ -1,0 +1,17 @@
+<odoo>
+    <data>
+        <!-- Example of creating a default record for model 'your.model' -->
+        <record model="ir.sequence" id="default_sequence_transferencia_borrador">
+            <field name="name">Secuencia transferencia interna borrador</field>
+            <field name="code">secuencia.borrador</field>
+            <field name="implementation">standard</field>
+            <field name="prefix">Borrador *</field>
+            <field name="padding">5</field>
+            <field name="number_increment">1</field>
+            <field name="number_next_actual">1</field>
+            <!-- Add more fields as needed -->
+        </record>
+
+        <!-- Add more records as needed -->
+    </data>
+</odoo>
