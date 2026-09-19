@@ -130,7 +130,9 @@ class EsiSalePaymentWizard(models.TransientModel):
             raise UserError(_('El importe no puede ser mayor al saldo pendiente de la factura.'))
 
         sale_type = order.work_process_order_id
-        if not sale_type or not sale_type.payment_journal:
+        if not sale_type or not sale_type.allow_payment_from_sale:
+            raise UserError(_('El registro de pagos desde Ventas está desactivado para este Tipo de Venta.'))
+        if not sale_type.payment_journal:
             raise UserError(_('El Tipo de Venta no tiene Diario de Pago configurado.'))
         journal = sale_type.sudo().payment_journal
         if journal.company_id != order.company_id or journal.type not in ('bank', 'cash'):

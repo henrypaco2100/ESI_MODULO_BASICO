@@ -1,5 +1,5 @@
-{'name': 'ESI - Tipo de Ventas - ESI',
- 'version': '13.0.3.0.0',
+{'name': 'ESI - Tipo de Ventas',
+ 'version': '13.0.3.1.0',
  'summary': 'ESI - Tipos de venta, flujo configurable, entrega, facturación y pagos desde ventas',
  'author': 'ESI - Especialistas en Sistemas Integrados',
  'maintainer': 'ESI - Especialistas en Sistemas Integrados',

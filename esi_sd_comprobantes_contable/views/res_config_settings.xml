@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="esi_res_config_settings_comprobante_form" model="ir.ui.view">
+            <field name="name">res.config.settings.comprobante.esi</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@data-key='account']" position="inside">
+                    <h2>Formato de comprobantes</h2>
+                    <div class="row mt16 o_settings_container" name="esi_comprobante_format_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <label for="esi_comprobante_format" string="Formato predeterminado"/>
+                                <div class="text-muted">
+                                    El formato seleccionado se utilizará al imprimir comprobantes contables y comprobantes de pago.
+                                </div>
+                                <div class="mt16">
+                                    <field name="esi_comprobante_format" widget="radio"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+        <function model="res.company" name="_esi_initialize_comprobante_format"/>
+    </data>
+</odoo>

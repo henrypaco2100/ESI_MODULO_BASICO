@@ -14,17 +14,20 @@ class AutomatedPurchaseOrder(models.Model):
     sequence = fields.Integer(string='Secuencia', default=10)
     active = fields.Boolean(string='Activo', default=True)
     company_id = fields.Many2one(
-        'res.company', string='Compañía', required=True,
+        'res.company', string='Compañía',
         default=lambda self: self.env.user.company_id,
     )
-    st_almacen = fields.Many2one('stock.warehouse', string='Almacén', required=True)
+    st_almacen = fields.Many2one('stock.warehouse', string='Almacén')
     st_entregar_a = fields.Many2one('stock.picking.type', string='Entregar a')
     st_secuencia_quotation = fields.Many2one('ir.sequence', string='Secuencia Solicitud')
     st_secuencia = fields.Many2one('ir.sequence', string='Secuencia Compra')
-    purchase_journal = fields.Many2one('account.journal', string='Diario de Compras', required=True)
-    payment_journal = fields.Many2one('account.journal', string='Diario de Pago', required=True)
+    purchase_journal = fields.Many2one('account.journal', string='Diario de Compras')
+    payment_journal = fields.Many2one('account.journal', string='Diario de Pago')
     validation_picking = fields.Boolean(string='Validar Recepción', default=False)
     validate_invoice = fields.Boolean(string='Publicar Factura', default=True)
+    allow_payment_from_purchase = fields.Boolean(
+        string='Realizar Pagos desde Compras', default=True
+    )
 
     @api.onchange('company_id')
     def _onchange_company_id_esi(self):
@@ -86,7 +89,7 @@ class PurchaseOrder(models.Model):
 
     work_process_order_id = fields.Many2one(
         'automated.purchase', string='Tipo de Compra', copy=True,
-        domain="[('company_id', '=', company_id), ('active', '=', True)]",
+        domain="['&', ('active', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
     )
     esi_can_register_payment = fields.Boolean(
         string='Puede registrar pago', compute='_compute_esi_can_register_payment'
@@ -115,7 +118,10 @@ class PurchaseOrder(models.Model):
     @api.model
     def _esi_purchase_type_vals(self, purchase_type):
         warehouse = purchase_type.st_almacen
-        return {'picking_type_id': warehouse.in_type_id.id if warehouse else False}
+        vals = {}
+        if warehouse and warehouse.in_type_id:
+            vals['picking_type_id'] = warehouse.in_type_id.id
+        return vals
 
     @api.onchange('work_process_order_id')
     def _onchange_work_process_order_id_esi(self):
@@ -168,18 +174,10 @@ class PurchaseOrder(models.Model):
             purchase_type = order.work_process_order_id
             if not purchase_type:
                 raise UserError(_('Debe seleccionar un Tipo de Compra antes de confirmar.'))
-            if not purchase_type.st_almacen:
-                raise UserError(_('El Tipo de Compra debe tener un Almacén configurado.'))
-            if not purchase_type.st_almacen.in_type_id:
-                raise UserError(_('El almacén no tiene una operación de Recepciones configurada.'))
-            if not purchase_type.st_secuencia:
-                raise UserError(_('El Tipo de Compra debe tener una Secuencia Compra configurada.'))
-            if not purchase_type.purchase_journal:
-                raise UserError(_('El Tipo de Compra debe tener un Diario de Compras configurado.'))
-            if not purchase_type.payment_journal:
-                raise UserError(_('El Tipo de Compra debe tener un Diario de Pago configurado.'))
-            if purchase_type.company_id != order.company_id:
+            if purchase_type.company_id and purchase_type.company_id != order.company_id:
                 raise UserError(_('El Tipo de Compra pertenece a otra compañía.'))
+            if purchase_type.st_almacen and not purchase_type.st_almacen.in_type_id:
+                raise UserError(_('El almacén configurado no tiene una operación de Recepciones.'))
         return True
 
     def _esi_validate_receipt(self):
@@ -248,7 +246,10 @@ class PurchaseOrder(models.Model):
             invoices = order.sudo().invoice_ids.filtered(
                 lambda inv: inv.type == 'in_invoice' and inv.state == 'posted' and inv.amount_residual > 0
             )
-            order.esi_can_register_payment = bool(invoices)
+            purchase_type = order.work_process_order_id
+            order.esi_can_register_payment = bool(
+                invoices and purchase_type and purchase_type.allow_payment_from_purchase
+            )
 
     def action_open_esi_payment_wizard(self):
         self.ensure_one()
@@ -256,6 +257,9 @@ class PurchaseOrder(models.Model):
         self.check_access_rule('read')
         if self.state not in ('purchase', 'done'):
             raise UserError(_('Primero debe confirmar la compra.'))
+        purchase_type = self.work_process_order_id
+        if not purchase_type or not purchase_type.allow_payment_from_purchase:
+            raise UserError(_('El registro de pagos desde Compras está desactivado para este Tipo de Compra.'))
         invoices = self.sudo().invoice_ids.filtered(
             lambda inv: inv.type == 'in_invoice' and inv.state == 'posted' and inv.amount_residual > 0
         )

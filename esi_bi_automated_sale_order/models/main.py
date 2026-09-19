@@ -14,16 +14,18 @@ class AutomatedSaleOrder(models.Model):
     sequence = fields.Integer(string='Secuencia', default=10)
     active = fields.Boolean(string='Activo', default=True)
     company_id = fields.Many2one(
-        'res.company', string='Compañía', required=True,
+        'res.company', string='Compañía',
         default=lambda self: self.env.user.company_id,
     )
-    st_almacen = fields.Many2one('stock.warehouse', string='Almacén', required=True)
+    st_almacen = fields.Many2one('stock.warehouse', string='Almacén')
     st_secuencia_quotation = fields.Many2one('ir.sequence', string='Secuencia Cotización')
-    st_secuencia = fields.Many2one('ir.sequence', string='Secuencia Venta')
-    sales_journal = fields.Many2one('account.journal', string='Diario de Ventas', required=True)
-    payment_journal = fields.Many2one('account.journal', string='Diario de Pago', required=True)
+    sales_journal = fields.Many2one('account.journal', string='Diario de Ventas')
+    payment_journal = fields.Many2one('account.journal', string='Diario de Pago')
     validation_picking = fields.Boolean(string='Validar Entrega', default=False)
     validate_invoice = fields.Boolean(string='Publicar Factura', default=True)
+    allow_payment_from_sale = fields.Boolean(
+        string='Realizar Pagos desde Ventas', default=True
+    )
 
     @api.onchange('company_id')
     def _onchange_company_id_esi(self):
@@ -36,7 +38,7 @@ class AutomatedSaleOrder(models.Model):
                 rec.payment_journal = False
 
     @api.constrains(
-        'company_id', 'st_almacen', 'st_secuencia', 'st_secuencia_quotation',
+        'company_id', 'st_almacen', 'st_secuencia_quotation',
         'sales_journal', 'payment_journal'
     )
     def _check_sale_type_configuration(self):
@@ -51,9 +53,9 @@ class AutomatedSaleOrder(models.Model):
                 raise ValidationError(_('El Diario de Pago no pertenece a la compañía seleccionada.'))
             if rec.payment_journal and rec.payment_journal.type not in ('bank', 'cash'):
                 raise ValidationError(_('El Diario de Pago debe ser de tipo Banco o Efectivo.'))
-            for sequence in (rec.st_secuencia_quotation, rec.st_secuencia):
-                if sequence and sequence.company_id and sequence.company_id != rec.company_id:
-                    raise ValidationError(_('La secuencia no pertenece a la compañía seleccionada.'))
+            sequence = rec.st_secuencia_quotation
+            if sequence and rec.company_id and sequence.company_id and sequence.company_id != rec.company_id:
+                raise ValidationError(_('La secuencia no pertenece a la compañía seleccionada.'))
 
 
 class SaleOrder(models.Model):
@@ -61,7 +63,7 @@ class SaleOrder(models.Model):
 
     work_process_order_id = fields.Many2one(
         'automated.sale', string='Tipo de Venta', copy=True,
-        domain="[('company_id', '=', company_id), ('active', '=', True)]",
+        domain="['&', ('active', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]",
     )
     esi_can_register_payment = fields.Boolean(
         string='Puede registrar pago', compute='_compute_esi_can_register_payment'
@@ -89,12 +91,15 @@ class SaleOrder(models.Model):
 
     @api.model
     def _esi_sale_type_vals(self, sale_type):
-        return {'warehouse_id': sale_type.st_almacen.id or False}
+        vals = {}
+        if sale_type.st_almacen:
+            vals['warehouse_id'] = sale_type.st_almacen.id
+        return vals
 
     @api.onchange('work_process_order_id')
     def _onchange_work_process_order_id_esi(self):
         for order in self:
-            if order.work_process_order_id:
+            if order.work_process_order_id and order.work_process_order_id.st_almacen:
                 order.warehouse_id = order.work_process_order_id.st_almacen
 
     @api.model
@@ -142,15 +147,7 @@ class SaleOrder(models.Model):
             sale_type = order.work_process_order_id
             if not sale_type:
                 raise UserError(_('Debe seleccionar un Tipo de Venta antes de confirmar.'))
-            if not sale_type.st_almacen:
-                raise UserError(_('El Tipo de Venta debe tener un Almacén configurado.'))
-            if not sale_type.st_secuencia:
-                raise UserError(_('El Tipo de Venta debe tener una Secuencia Venta configurada.'))
-            if not sale_type.sales_journal:
-                raise UserError(_('El Tipo de Venta debe tener un Diario de Ventas configurado.'))
-            if not sale_type.payment_journal:
-                raise UserError(_('El Tipo de Venta debe tener un Diario de Pago configurado.'))
-            if sale_type.company_id != order.company_id:
+            if sale_type.company_id and sale_type.company_id != order.company_id:
                 raise UserError(_('El Tipo de Venta pertenece a otra compañía.'))
         return True
 
@@ -201,14 +198,8 @@ class SaleOrder(models.Model):
         for order in self:
             sale_type = order.work_process_order_id
             values = self._esi_sale_type_vals(sale_type)
-            name = self._esi_next_sequence(
-                sale_type.st_secuencia,
-                order.date_order,
-                sale_type.company_id,
-            )
-            if name:
-                values['name'] = name
-            super(SaleOrder, order).write(values)
+            if values:
+                super(SaleOrder, order).write(values)
         result = super().action_confirm()
         for order in self:
             if order.work_process_order_id.validation_picking:
@@ -221,7 +212,10 @@ class SaleOrder(models.Model):
             invoices = order.sudo().invoice_ids.filtered(
                 lambda inv: inv.type == 'out_invoice' and inv.state == 'posted' and inv.amount_residual > 0
             )
-            order.esi_can_register_payment = bool(invoices)
+            sale_type = order.work_process_order_id
+            order.esi_can_register_payment = bool(
+                invoices and sale_type and sale_type.allow_payment_from_sale
+            )
 
     def action_open_esi_payment_wizard(self):
         self.ensure_one()
@@ -229,6 +223,9 @@ class SaleOrder(models.Model):
         self.check_access_rule('read')
         if self.state not in ('sale', 'done'):
             raise UserError(_('Primero debe confirmar la venta.'))
+        sale_type = self.work_process_order_id
+        if not sale_type or not sale_type.allow_payment_from_sale:
+            raise UserError(_('El registro de pagos desde Ventas está desactivado para este Tipo de Venta.'))
         invoices = self.sudo().invoice_ids.filtered(
             lambda inv: inv.type == 'out_invoice' and inv.state == 'posted' and inv.amount_residual > 0
         )
