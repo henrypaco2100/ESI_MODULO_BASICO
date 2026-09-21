@@ -1,28 +1,33 @@
-# ESI Calzados - Demo v13 13.0.3.1.0
+# ESI Calzados - Demo v13 13.0.3.2.0
 
-## Corrección principal
-Esta versión elimina el `post_init_hook` pesado que podía abortar la instalación y dejar el navegador en **Intentando reconectar**.
+## Cambio principal
+Esta versión **sí carga la demo automáticamente** al instalar o al pulsar **Upgrade**.
+La versión 13.0.3.1.0 solo instalaba el asistente y esperaba que el usuario pulsara
+`CREAR / ACTUALIZAR DEMO`, por eso Odoo podía mostrar el módulo como instalado sin
+productos, LdM ni destajos.
 
-El módulo se instala primero de forma limpia. Luego:
-
-**Fabricación > Configuración > ESI Demo Calzados > CREAR / ACTUALIZAR DEMO**
-
-La carga es idempotente y puede ejecutarse nuevamente.
-
-## Crea
-- 3 productos terminados con Talla / Color.
-- 3 LdM.
-- 22 materias primas con costo.
-- Actividades de destajo y 9 destajos en borrador.
-- 3 OF demo (opcional desde el checkbox).
-- Cuentas analíticas de producción.
-- Categorías AVCO + valoración automática.
-- Cuenta 153000 Materias primas.
+## Al instalar / actualizar crea
+- 3 productos terminados: Bota Lona, Bota Puro Cuero y Tenis Táctico.
+- Variantes por Talla y Color.
+- 3 listas de materiales.
+- 22 materias primas con costos y proveedor demo.
+- 3 cuentas analíticas de producción.
+- Categorías con costo Promedio (AVCO) y valoración automática.
+- Cuenta 153000 Materias Primas.
 - Cuenta 154000 Producción en Proceso.
-- Cuenta 155000 Producto Terminado.
-- Cuenta 215500 Destajos por pagar.
+- Cuenta 155000 Productos Terminados.
+- Cuenta 215500 Destajos por Pagar.
 - Diario ESIPR.
+- 4 actividades de destajo.
+- 3 órdenes de fabricación demo.
+- 9 destajos en borrador, sin horas ni tiempos.
 
-## Compatibilidad
-Depende únicamente de `esi_calzados_v13`; no depende de módulos de procesos.
-Está diseñado para convivir con ESI_MODULO_BASICO y reutiliza cuentas por código si ya existen.
+## Regeneración manual
+Fabricación > Configuración > ESI Demo Calzados > CREAR / ACTUALIZAR DEMO.
+
+La carga es idempotente y busca registros existentes por código/nombre/origen antes de crear.
+
+
+## 13.0.3.2.1
+- Compatibilidad con `esi_sd_account_v13`: completa `sd_codigo` al crear cuentas analíticas.
+- La demo se carga con el botón **CREAR / ACTUALIZAR DEMO** para aislar errores de datos de la instalación del módulo.

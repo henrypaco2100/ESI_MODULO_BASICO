@@ -140,11 +140,22 @@ class EsiCalzadosDemoLoader(models.TransientModel):
         return line
 
     def _get_or_create_analytic(self, company, name, code):
+        """Crea/actualiza una cuenta analítica compatible con ESI_MODULO_BASICO.
+
+        El módulo esi_sd_account_v13 agrega el campo obligatorio ``sd_codigo``
+        a account.analytic.account. En una base sin ese módulo el campo no existe,
+        por eso se completa de forma dinámica solamente cuando está disponible.
+        """
         Analytic = self.env['account.analytic.account'].sudo().with_context(force_company=company.id)
         rec = Analytic.search([('name', '=', name), ('company_id', 'in', [False, company.id])], limit=1)
         vals = {'name': name, 'company_id': company.id}
         if 'code' in Analytic._fields:
             vals['code'] = code
+        # Compatibilidad con ESI_MODULO_BASICO / esi_sd_account_v13.
+        # Ese módulo define sd_codigo como required=True y a nivel SQL termina
+        # existiendo como NOT NULL en bases donde ya fue aplicado.
+        if 'sd_codigo' in Analytic._fields:
+            vals['sd_codigo'] = code
         if rec:
             rec.write(vals)
         else:
@@ -347,6 +358,22 @@ class EsiCalzadosDemoLoader(models.TransientModel):
             'date': fields.Date.context_today(self),
             'state': 'draft',
         })
+
+    @api.model
+    def auto_load_demo(self):
+        """Carga automática usada por XML al instalar o actualizar el módulo.
+
+        A diferencia de la versión anterior, no deja el módulo instalado vacío:
+        si la carga no puede completarse, la instalación/actualización mostrará
+        el error real y hará rollback, evitando una falsa instalación sin datos.
+        """
+        company = self.env.user.company_id or self.env.company
+        wizard = self.create({
+            'company_id': company.id,
+            'create_manufacturing_orders': True,
+        })
+        wizard.action_load_demo()
+        return True
 
     # ------------------------------------------------------------------
     # Carga demo

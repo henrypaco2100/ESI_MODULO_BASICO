@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+      Se ejecuta tanto en instalación como en actualización.
+      La carga es idempotente: busca por códigos/nombres/orígenes y actualiza en lugar de duplicar.
+    -->
+    <function model="esi.calzados.demo.loader" name="auto_load_demo"/>
+</odoo>
