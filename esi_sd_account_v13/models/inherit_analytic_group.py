@@ -3,7 +3,7 @@ from odoo import models, fields, api, _
 class InheritAccountGroup(models.Model):
     _inherit = 'account.analytic.group'
 
-    sd_codigo = fields.Char('Codigo', required="True")
+    sd_codigo = fields.Char('Codigo', required="False")
 
     def name_get(self):
         result = []
