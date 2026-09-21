@@ -318,12 +318,21 @@ class EsiCalzadosDemoLoader(models.TransientModel):
         return rec
 
     def _get_or_create_mo(self, company, product, bom, qty, analytic, origin):
+        """Crea/repara una OF demo con sus componentes antes de confirmar.
+
+        En Odoo 13, crear ``mrp.production`` por ORM con ``bom_id`` no ejecuta
+        automáticamente el onchange que genera ``move_raw_ids``. Si se llama
+        ``action_confirm`` inmediatamente, Odoo muestra:
+        "Agregue algunos materiales a consumir antes de marcar esta OP por hacer".
+
+        Esta rutina también repara OF demo que hayan quedado en borrador por un
+        intento anterior fallido.
+        """
         Production = self.env['mrp.production'].sudo().with_context(
             default_company_id=company.id, force_company=company.id
         )
         mo = Production.search([('origin', '=', origin), ('company_id', '=', company.id)], limit=1)
-        if mo:
-            return mo
+
         vals = {
             'product_id': product.id,
             'product_qty': qty,
@@ -333,8 +342,37 @@ class EsiCalzadosDemoLoader(models.TransientModel):
             'origin': origin,
             'esi_analytic_account_id': analytic.id,
         }
-        mo = Production.create(vals)
-        mo.action_confirm()
+
+        if mo:
+            # Si un intento anterior dejó la OF en borrador sin componentes,
+            # actualizamos cabecera y reconstruimos las líneas desde la LdM.
+            if mo.state == 'draft':
+                mo.write(vals)
+        else:
+            # Odoo 13 usa este contexto en create() para disparar
+            # _onchange_move_raw(), exactamente como al importar una OF.
+            mo = Production.with_context(import_file=True).create(vals)
+
+        if mo.state == 'draft':
+            if not mo.move_raw_ids:
+                mo._onchange_move_raw()
+
+            # Respaldo explícito: algunas personalizaciones pueden interferir con
+            # el onchange. En ese caso generamos directamente los movimientos
+            # de componentes usando el método estándar de Odoo 13.
+            if not mo.move_raw_ids and mo.bom_id:
+                move_vals = mo._get_moves_raw_values()
+                if move_vals:
+                    self.env['stock.move'].sudo().create(move_vals)
+
+            if not mo.move_raw_ids:
+                raise UserError(_(
+                    'La OF demo %s no pudo generar materiales desde la LdM %s. '
+                    'Revise que la LdM tenga componentes aplicables a la variante %s.'
+                ) % (origin, bom.display_name, product.display_name))
+
+            mo.action_confirm()
+
         return mo
 
     def _create_destajo(self, mo, worker, activity, qty, rate, description, pair_uom):
