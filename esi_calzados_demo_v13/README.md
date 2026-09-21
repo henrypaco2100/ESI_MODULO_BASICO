@@ -1,13 +1,28 @@
-# ESI Calzados Demo v13
+# ESI Calzados - Demo v13 13.0.3.1.0
 
-Demo de 3 productos terminados con variantes, listas de materiales, destajos, cuentas analíticas y valoración automática.
+## Corrección principal
+Esta versión elimina el `post_init_hook` pesado que podía abortar la instalación y dejar el navegador en **Intentando reconectar**.
 
-## Corrección 13.0.3.0.1
-El `post_init_hook` se exporta correctamente desde `__init__.py` para que Odoo 13 pueda ejecutarlo durante la instalación.
+El módulo se instala primero de forma limpia. Luego:
 
-## Productos demo
-- Bota Lona ESI Demo
-- Bota Puro Cuero ESI Demo
-- Tenis Táctico ESI Demo
+**Fabricación > Configuración > ESI Demo Calzados > CREAR / ACTUALIZAR DEMO**
 
-La demo crea cuentas/parametrización si no existen, categorías AVCO con valoración automática, ubicación de Producción con cuenta WIP, materias primas, proveedor, variantes Talla/Color, LdM, cuentas analíticas, 3 OF y destajos en borrador.
+La carga es idempotente y puede ejecutarse nuevamente.
+
+## Crea
+- 3 productos terminados con Talla / Color.
+- 3 LdM.
+- 22 materias primas con costo.
+- Actividades de destajo y 9 destajos en borrador.
+- 3 OF demo (opcional desde el checkbox).
+- Cuentas analíticas de producción.
+- Categorías AVCO + valoración automática.
+- Cuenta 153000 Materias primas.
+- Cuenta 154000 Producción en Proceso.
+- Cuenta 155000 Producto Terminado.
+- Cuenta 215500 Destajos por pagar.
+- Diario ESIPR.
+
+## Compatibilidad
+Depende únicamente de `esi_calzados_v13`; no depende de módulos de procesos.
+Está diseñado para convivir con ESI_MODULO_BASICO y reutiliza cuentas por código si ya existen.
