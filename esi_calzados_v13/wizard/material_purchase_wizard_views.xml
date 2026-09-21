@@ -9,6 +9,7 @@
                     <group><field name="production_id" readonly="1"/><field name="currency_id" invisible="1"/><field name="total_estimated" readonly="1"/></group>
                     <field name="line_ids" nolabel="1">
                         <tree editable="bottom" create="false" delete="false">
+                            <field name="move_id" invisible="1" force_save="1"/>
                             <field name="selected"/>
                             <field name="product_id" readonly="1"/>
                             <field name="uom_id" readonly="1"/>

@@ -18,41 +18,50 @@ class EsiCalzadoPurchaseRequestWizard(models.TransientModel):
         vals = super(EsiCalzadoPurchaseRequestWizard, self).default_get(fields_list)
         production = self.env['mrp.production'].browse(
             self.env.context.get('default_production_id') or self.env.context.get('active_id')
-        )
+        ).exists()
         if production:
             vals['production_id'] = production.id
             lines = []
-            for move in production.esi_get_shortage_moves():
+            for move in production.esi_get_shortage_moves().filtered(lambda m: m.product_id):
                 seller = move.product_id._select_seller(
                     quantity=move.esi_missing_qty or 1.0,
                     date=fields.Date.today(),
                     uom_id=move.product_uom,
                 )
-                vendor = seller.name if seller else (move.product_id.seller_ids[:1].name if move.product_id.seller_ids else False)
+                vendor = seller.name if seller else (
+                    move.product_id.seller_ids[:1].name if move.product_id.seller_ids else False
+                )
+                # Guardamos solamente el movimiento como origen. Material, UdM y cantidades
+                # son campos related del movimiento. Esto evita que Odoo 13 pierda el
+                # product_id al editar líneas inline del wizard.
                 lines.append((0, 0, {
                     'move_id': move.id,
-                    'product_id': move.product_id.id,
-                    'uom_id': move.product_uom.id,
-                    'required_qty': move.esi_total_required,
-                    'available_qty': move.esi_available_qty,
-                    'missing_qty': move.esi_missing_qty,
                     'vendor_id': vendor.id if vendor else False,
-                    'unit_price': move.esi_purchase_unit_cost,
+                    'unit_price': move.esi_purchase_unit_cost or move.esi_unit_cost or 0.0,
                     'selected': True,
                 }))
             vals['line_ids'] = lines
         return vals
 
-    @api.depends('line_ids.selected', 'line_ids.subtotal')
+    @api.depends('line_ids.selected', 'line_ids.missing_qty', 'line_ids.unit_price')
     def _compute_total(self):
         for wizard in self:
-            wizard.total_estimated = sum(wizard.line_ids.filtered('selected').mapped('subtotal'))
+            wizard.total_estimated = sum(
+                (line.missing_qty or 0.0) * (line.unit_price or 0.0)
+                for line in wizard.line_ids if line.selected
+            )
 
     def action_create_rfqs(self):
         self.ensure_one()
         lines = self.line_ids.filtered(lambda l: l.selected and l.missing_qty > 0)
         if not lines:
             raise UserError(_('No hay líneas seleccionadas con faltantes.'))
+
+        invalid = lines.filtered(lambda l: not l.move_id or not l.product_id or not l.uom_id)
+        if invalid:
+            raise UserError(_(
+                'Hay líneas de faltantes sin material o unidad de medida. Cierre este asistente y vuelva a abrirlo desde la Orden de Fabricación.'
+            ))
         if any(not line.vendor_id for line in lines):
             raise UserError(_('Asigne un proveedor a todas las líneas seleccionadas.'))
 
@@ -102,12 +111,17 @@ class EsiCalzadoPurchaseRequestWizardLine(models.TransientModel):
 
     wizard_id = fields.Many2one('esi.calzado.purchase.request.wizard', required=True, ondelete='cascade')
     selected = fields.Boolean(string='Comprar', default=True)
-    move_id = fields.Many2one('stock.move', string='Movimiento')
-    product_id = fields.Many2one('product.product', string='Material', required=True)
-    uom_id = fields.Many2one('uom.uom', string='UdM', required=True)
-    required_qty = fields.Float(string='Requerido', digits='Product Unit of Measure')
-    available_qty = fields.Float(string='Disponible', digits='Product Unit of Measure')
-    missing_qty = fields.Float(string='Faltante', digits='Product Unit of Measure')
+    move_id = fields.Many2one('stock.move', string='Movimiento', required=True, ondelete='cascade')
+
+    # En Odoo 13 los campos readonly dentro de un One2many editable pueden no
+    # reenviarse al guardar. Al obtenerlos directamente del movimiento evitamos
+    # líneas transient sin product_id (el error reportado por el usuario).
+    product_id = fields.Many2one(related='move_id.product_id', string='Material', readonly=True)
+    uom_id = fields.Many2one(related='move_id.product_uom', string='UdM', readonly=True)
+    required_qty = fields.Float(related='move_id.esi_total_required', string='Requerido', readonly=True)
+    available_qty = fields.Float(related='move_id.esi_available_qty', string='Disponible', readonly=True)
+    missing_qty = fields.Float(related='move_id.esi_missing_qty', string='Faltante', readonly=True)
+
     vendor_id = fields.Many2one('res.partner', string='Proveedor', domain="[('supplier_rank','>',0)]")
     unit_price = fields.Float(string='Precio estimado', digits='Product Price')
     subtotal = fields.Float(string='Subtotal', compute='_compute_subtotal', digits='Product Price')
