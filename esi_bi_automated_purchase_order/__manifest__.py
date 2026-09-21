@@ -1,5 +1,5 @@
 {'name': 'ESI - Tipo de Compras',
- 'version': '13.0.3.1.0',
+ 'version': '13.0.1.8.0',
  'summary': 'ESI - Tipos de compra, flujo configurable, recepción, facturación y pagos desde compras',
  'author': 'ESI - Especialistas en Sistemas Integrados',
  'maintainer': 'ESI - Especialistas en Sistemas Integrados',

@@ -16,10 +16,12 @@ class EsiSalePaymentWizard(models.TransientModel):
     )
     partner_id = fields.Many2one('res.partner', string='Cliente', readonly=True)
     currency_id = fields.Many2one('res.currency', string='Moneda', readonly=True)
+    journal_choice = fields.Selection(
+        selection='_selection_payment_journals', string='Forma de Pago', required=True
+    )
     amount_due = fields.Monetary(string='Saldo Pendiente', currency_field='currency_id', readonly=True)
     amount = fields.Monetary(string='Importe a Pagar', currency_field='currency_id', required=True)
     payment_date = fields.Date(string='Fecha de Pago', required=True, default=fields.Date.context_today)
-    journal_name = fields.Char(string='Diario de Pago', readonly=True)
     communication = fields.Char(string='Referencia')
 
     @api.model
@@ -51,26 +53,54 @@ class EsiSalePaymentWizard(models.TransientModel):
         ]
 
     @api.model
+    def _allowed_payment_journals(self, order):
+        """Diarios Caja/Banco válidos para la compañía y, si existe Store, para la sucursal."""
+        if not order:
+            return self.env['account.journal']
+        Journal = self.env['account.journal'].sudo()
+        domain = [
+            ('company_id', '=', order.company_id.id),
+            ('type', 'in', ('bank', 'cash')),
+            ('at_least_one_inbound', '=', True),
+        ]
+        if 'store_id' in Journal._fields and 'store_id' in order._fields and order.store_id:
+            domain += ['|', ('store_id', '=', False), ('store_id', '=', order.store_id.id)]
+        return Journal.search(domain, order='type, name, id')
+
+    @api.model
+    def _selection_payment_journals(self):
+        order = self._get_order_from_context()
+        if not order:
+            return []
+        result = []
+        for journal in self._allowed_payment_journals(order):
+            payment_type = _('Caja') if journal.type == 'cash' else _('Banco')
+            result.append((str(journal.id), '%s - %s' % (payment_type, journal.display_name)))
+        return result
+
+    @api.model
     def default_get(self, fields_list):
         res = super().default_get(fields_list)
         order = self._get_order_from_context()
         if not order:
             return res
-        choices = self._selection_invoices()
-        if not choices:
+        invoice_choices = self._selection_invoices()
+        if not invoice_choices:
             raise UserError(_('No existe una factura publicada con saldo pendiente.'))
-        invoice_id = int(choices[0][0])
+        journal_choices = self._selection_payment_journals()
+        if not journal_choices:
+            raise UserError(_('No existe un diario de Caja o Banco disponible para esta venta.'))
+
+        invoice_id = int(invoice_choices[0][0])
         invoice = self.env['account.move'].sudo().browse(invoice_id)
-        sale_type = order.work_process_order_id
-        journal = sale_type.sudo().payment_journal if sale_type else self.env['account.journal']
         res.update({
             'sale_order_id': order.id,
             'invoice_choice': str(invoice.id),
             'partner_id': invoice.partner_id.id,
             'currency_id': invoice.currency_id.id,
+            'journal_choice': journal_choices[0][0],
             'amount_due': invoice.amount_residual,
             'amount': invoice.amount_residual,
-            'journal_name': journal.display_name if journal else False,
             'communication': invoice.name or order.name,
         })
         return res
@@ -88,16 +118,11 @@ class EsiSalePaymentWizard(models.TransientModel):
             self.amount = invoice.amount_residual
             self.communication = invoice.name or order.name
 
-    def _get_payment_method(self):
-        PaymentMethod = self.env['account.payment.method'].sudo()
-        method = PaymentMethod.search([
-            ('payment_type', '=', 'inbound'),
-            ('code', '=', 'manual'),
-        ], limit=1)
+    def _get_payment_method(self, journal):
+        methods = journal.sudo().inbound_payment_method_ids
+        method = methods.filtered(lambda m: m.code == 'manual')[:1] or methods[:1]
         if not method:
-            method = PaymentMethod.search([('payment_type', '=', 'inbound')], limit=1)
-        if not method:
-            raise UserError(_('No existe un método de pago de entrada configurado.'))
+            raise UserError(_('No existe un método de cobro configurado para el diario seleccionado.'))
         return method
 
     def action_register_payment(self):
@@ -114,6 +139,8 @@ class EsiSalePaymentWizard(models.TransientModel):
             raise UserError(_('La venta debe estar confirmada.'))
         if not self.invoice_choice:
             raise UserError(_('Seleccione una factura.'))
+        if not self.journal_choice:
+            raise UserError(_('Seleccione una Forma de Pago.'))
 
         invoice = self.env['account.move'].sudo().browse(int(self.invoice_choice)).exists()
         if not invoice or invoice.id not in order.sudo().invoice_ids.ids:
@@ -132,13 +159,17 @@ class EsiSalePaymentWizard(models.TransientModel):
         sale_type = order.work_process_order_id
         if not sale_type or not sale_type.allow_payment_from_sale:
             raise UserError(_('El registro de pagos desde Ventas está desactivado para este Tipo de Venta.'))
-        if not sale_type.payment_journal:
-            raise UserError(_('El Tipo de Venta no tiene Diario de Pago configurado.'))
-        journal = sale_type.sudo().payment_journal
-        if journal.company_id != order.company_id or journal.type not in ('bank', 'cash'):
-            raise UserError(_('El Diario de Pago configurado no es válido para esta venta.'))
 
-        method = self._get_payment_method()
+        try:
+            journal_id = int(self.journal_choice)
+        except (TypeError, ValueError):
+            raise UserError(_('La Forma de Pago seleccionada no es válida.'))
+        allowed_journals = self._allowed_payment_journals(order)
+        journal = allowed_journals.filtered(lambda j: j.id == journal_id)[:1]
+        if not journal:
+            raise UserError(_('El diario seleccionado no está disponible para esta venta.'))
+
+        method = self._get_payment_method(journal)
         payment_vals = {
             'partner_id': invoice.partner_id.id,
             'amount': self.amount,
@@ -160,11 +191,12 @@ class EsiSalePaymentWizard(models.TransientModel):
         payment.post()
 
         order.message_post(body=_(
-            'ESI: %s registró un pago de %s %s sobre la factura %s.'
+            'ESI: %s registró un pago de %s %s mediante %s sobre la factura %s.'
         ) % (
             self.env.user.display_name,
             ('%.2f' % self.amount),
             invoice.currency_id.name,
+            journal.display_name,
             invoice.name or '',
         ))
         return {'type': 'ir.actions.act_window_close'}

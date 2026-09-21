@@ -6,13 +6,13 @@
         <field name="arch" type="xml">
             <form string="Registrar Pago">
                 <div class="alert alert-info" role="alert">
-                    <strong>ESI:</strong> el pago se aplicará directamente a la factura seleccionada. El usuario no recibe permisos contables adicionales.
+                    <strong>ESI:</strong> el pago se aplicará directamente a la factura seleccionada.
                 </div>
                 <group>
                     <field name="sale_order_id" invisible="1"/>
                     <field name="invoice_choice"/>
                     <field name="partner_id"/>
-                    <field name="journal_name"/>
+                    <field name="journal_choice"/>
                     <field name="amount_due"/>
                     <field name="amount"/>
                     <field name="currency_id" invisible="1"/>

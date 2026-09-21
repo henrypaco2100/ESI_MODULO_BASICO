@@ -12,10 +12,8 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="sequence" string="Orden"/>
                             <field name="st_almacen" domain="[('company_id', '=', company_id)]"/>
                             <field name="sales_journal" domain="[('company_id', '=', company_id), ('type', '=', 'sale')]"/>
-                            <field name="payment_journal" domain="[('company_id', '=', company_id), ('type', 'in', ('bank', 'cash'))]" attrs="{'invisible': [('allow_payment_from_sale', '=', False)]}"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="active" invisible="1"/>
                         </group>
@@ -37,11 +35,9 @@
         <field name="arch" type="xml">
             <tree string="Tipo de Ventas">
                 <field name="sequence" widget="handle" string="Ordenar"/>
-                <field name="sequence" string="Orden"/>
                 <field name="name"/>
                 <field name="st_almacen"/>
                 <field name="sales_journal"/>
-                <field name="payment_journal"/>
                 <field name="allow_payment_from_sale"/>
                 <field name="validation_picking"/>
                 <field name="validate_invoice"/>

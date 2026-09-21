@@ -18,9 +18,8 @@ class AutomatedSaleOrder(models.Model):
         default=lambda self: self.env.user.company_id,
     )
     st_almacen = fields.Many2one('stock.warehouse', string='Almacén')
-    st_secuencia_quotation = fields.Many2one('ir.sequence', string='Secuencia Cotización')
+    st_secuencia_quotation = fields.Many2one('ir.sequence', string='Secuencia')
     sales_journal = fields.Many2one('account.journal', string='Diario de Ventas')
-    payment_journal = fields.Many2one('account.journal', string='Diario de Pago')
     validation_picking = fields.Boolean(string='Validar Entrega', default=False)
     validate_invoice = fields.Boolean(string='Publicar Factura', default=True)
     allow_payment_from_sale = fields.Boolean(
@@ -34,12 +33,10 @@ class AutomatedSaleOrder(models.Model):
                 rec.st_almacen = False
             if rec.sales_journal and rec.sales_journal.company_id != rec.company_id:
                 rec.sales_journal = False
-            if rec.payment_journal and rec.payment_journal.company_id != rec.company_id:
-                rec.payment_journal = False
 
     @api.constrains(
         'company_id', 'st_almacen', 'st_secuencia_quotation',
-        'sales_journal', 'payment_journal'
+        'sales_journal'
     )
     def _check_sale_type_configuration(self):
         for rec in self:
@@ -49,10 +46,6 @@ class AutomatedSaleOrder(models.Model):
                 raise ValidationError(_('El Diario de Ventas no pertenece a la compañía seleccionada.'))
             if rec.sales_journal and rec.sales_journal.type != 'sale':
                 raise ValidationError(_('El Diario de Ventas debe ser de tipo Ventas.'))
-            if rec.payment_journal and rec.payment_journal.company_id != rec.company_id:
-                raise ValidationError(_('El Diario de Pago no pertenece a la compañía seleccionada.'))
-            if rec.payment_journal and rec.payment_journal.type not in ('bank', 'cash'):
-                raise ValidationError(_('El Diario de Pago debe ser de tipo Banco o Efectivo.'))
             sequence = rec.st_secuencia_quotation
             if sequence and rec.company_id and sequence.company_id and sequence.company_id != rec.company_id:
                 raise ValidationError(_('La secuencia no pertenece a la compañía seleccionada.'))

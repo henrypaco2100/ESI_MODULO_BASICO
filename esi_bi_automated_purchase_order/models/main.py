@@ -3,6 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools.float_utils import float_compare
 
 
 class AutomatedPurchaseOrder(models.Model):
@@ -19,10 +20,8 @@ class AutomatedPurchaseOrder(models.Model):
     )
     st_almacen = fields.Many2one('stock.warehouse', string='Almacén')
     st_entregar_a = fields.Many2one('stock.picking.type', string='Entregar a')
-    st_secuencia_quotation = fields.Many2one('ir.sequence', string='Secuencia Solicitud')
-    st_secuencia = fields.Many2one('ir.sequence', string='Secuencia Compra')
+    st_secuencia_quotation = fields.Many2one('ir.sequence', string='Secuencia')
     purchase_journal = fields.Many2one('account.journal', string='Diario de Compras')
-    payment_journal = fields.Many2one('account.journal', string='Diario de Pago')
     validation_picking = fields.Boolean(string='Validar Recepción', default=False)
     validate_invoice = fields.Boolean(string='Publicar Factura', default=True)
     allow_payment_from_purchase = fields.Boolean(
@@ -37,8 +36,6 @@ class AutomatedPurchaseOrder(models.Model):
                 rec.st_entregar_a = False
             if rec.purchase_journal and rec.purchase_journal.company_id != rec.company_id:
                 rec.purchase_journal = False
-            if rec.payment_journal and rec.payment_journal.company_id != rec.company_id:
-                rec.payment_journal = False
 
     @api.onchange('st_almacen')
     def _onchange_st_almacen_esi(self):
@@ -64,8 +61,8 @@ class AutomatedPurchaseOrder(models.Model):
         return super().write(vals)
 
     @api.constrains(
-        'company_id', 'st_almacen', 'st_secuencia', 'st_secuencia_quotation',
-        'purchase_journal', 'payment_journal'
+        'company_id', 'st_almacen', 'st_secuencia_quotation',
+        'purchase_journal'
     )
     def _check_purchase_type_configuration(self):
         for rec in self:
@@ -75,13 +72,9 @@ class AutomatedPurchaseOrder(models.Model):
                 raise ValidationError(_('El Diario de Compras no pertenece a la compañía seleccionada.'))
             if rec.purchase_journal and rec.purchase_journal.type != 'purchase':
                 raise ValidationError(_('El Diario de Compras debe ser de tipo Compras.'))
-            if rec.payment_journal and rec.payment_journal.company_id != rec.company_id:
-                raise ValidationError(_('El Diario de Pago no pertenece a la compañía seleccionada.'))
-            if rec.payment_journal and rec.payment_journal.type not in ('bank', 'cash'):
-                raise ValidationError(_('El Diario de Pago debe ser de tipo Banco o Efectivo.'))
-            for sequence in (rec.st_secuencia_quotation, rec.st_secuencia):
-                if sequence and sequence.company_id and sequence.company_id != rec.company_id:
-                    raise ValidationError(_('La secuencia no pertenece a la compañía seleccionada.'))
+            sequence = rec.st_secuencia_quotation
+            if sequence and sequence.company_id and sequence.company_id != rec.company_id:
+                raise ValidationError(_('La secuencia no pertenece a la compañía seleccionada.'))
 
 
 class PurchaseOrder(models.Model):
@@ -200,40 +193,104 @@ class PurchaseOrder(models.Model):
                 move.quantity_done = move.product_uom_qty
             picking.button_validate()
 
+    @api.model
+    def _esi_purchase_line_qty_to_invoice(self, line):
+        """Cantidad pendiente de facturar según la lógica estándar de Odoo 13."""
+        if not line or line.display_type or not line.product_id:
+            return 0.0
+        if line.product_id.purchase_method == 'purchase':
+            qty = line.product_qty - line.qty_invoiced
+        else:
+            qty = line.qty_received - line.qty_invoiced
+        if float_compare(qty, 0.0, precision_rounding=line.product_uom.rounding) <= 0:
+            return 0.0
+        return qty
+
+    def _esi_create_vendor_bill_v13(self):
+        """Crea una factura de proveedor usando el autocompletado nativo de Odoo 13.
+
+        En Odoo 13 purchase.order.line no dispone de qty_to_invoice y purchase.order
+        no expone el flujo de creación de factura usado en versiones posteriores.
+        Replicamos el comportamiento de la pantalla estándar de Factura de Proveedor:
+        account.move recibe purchase_id y ejecuta _onchange_purchase_auto_complete().
+        """
+        self.ensure_one()
+        order = self.sudo()
+        purchase_type = order.work_process_order_id.sudo()
+        journal = purchase_type.purchase_journal if purchase_type else self.env['account.journal']
+
+        context = dict(self.env.context)
+        context.update({
+            'default_type': 'in_invoice',
+            'default_company_id': order.company_id.id,
+            'force_company': order.company_id.id,
+            'default_partner_id': order.partner_id.id,
+            'default_currency_id': order.currency_id.id,
+        })
+        if journal:
+            context['default_journal_id'] = journal.id
+
+        Move = self.env['account.move'].sudo().with_context(context)
+        invoice = Move.new({
+            'type': 'in_invoice',
+            'purchase_id': order.id,
+        })
+        invoice._onchange_purchase_auto_complete()
+        if journal:
+            invoice.journal_id = journal
+
+        vals = invoice._convert_to_write(invoice._cache)
+        # purchase_id es un campo auxiliar/no almacenado utilizado por el onchange.
+        vals.pop('purchase_id', None)
+        vals.pop('purchase_vendor_bill_id', None)
+        return Move.create(vals)
+
     def _esi_create_and_post_bill(self):
         self.ensure_one()
         order = self.sudo()
+
+        # Si la compra quedó esperando aprobación, no debemos crear ni publicar factura todavía.
+        if order.state not in ('purchase', 'done'):
+            return False
+
         invoiceable_lines = order.order_line.filtered(
-            lambda l: not l.display_type and l.qty_to_invoice > 0
+            lambda line: order._esi_purchase_line_qty_to_invoice(line) > 0
         )
-        if not order.invoice_ids and invoiceable_lines:
-            order.action_create_invoice()
         invoices = order.invoice_ids.filtered(lambda inv: inv.type == 'in_invoice')
+
+        if not invoices and invoiceable_lines:
+            order._esi_create_vendor_bill_v13()
+            # Refrescamos la relación calculada después de crear la factura.
+            order.invalidate_cache(['invoice_ids', 'invoice_count', 'invoice_status'])
+            invoices = order.invoice_ids.filtered(lambda inv: inv.type == 'in_invoice')
+
         draft_invoices = invoices.filtered(lambda inv: inv.state == 'draft')
-        if draft_invoices and self.work_process_order_id.purchase_journal:
-            draft_invoices.write({'journal_id': self.work_process_order_id.purchase_journal.id})
-        if self.work_process_order_id.validate_invoice:
+        purchase_type = order.work_process_order_id.sudo()
+        if draft_invoices and purchase_type.purchase_journal:
+            # Normalmente la factura ya nace con este diario por contexto. Esto cubre
+            # facturas borrador existentes creadas manualmente antes de confirmar.
+            draft_invoices.filtered(
+                lambda inv: inv.journal_id != purchase_type.purchase_journal
+            ).write({'journal_id': purchase_type.purchase_journal.id})
+
+        if purchase_type.validate_invoice:
             for invoice in draft_invoices:
-                invoice.action_post()
+                invoice.sudo().action_post()
+
         if not invoices and not invoiceable_lines:
             self.message_post(body=_(
                 'ESI: todavía no hay cantidades facturables. Si el producto se factura por cantidades '
                 'recibidas, la factura podrá generarse después de validar la recepción.'
             ))
+        return invoices
 
     def button_confirm(self):
         self._esi_validate_purchase_type()
         for order in self:
             purchase_type = order.work_process_order_id
             values = self._esi_purchase_type_vals(purchase_type)
-            name = self._esi_next_sequence(
-                purchase_type.st_secuencia,
-                order.date_order,
-                purchase_type.company_id,
-            )
-            if name:
-                values['name'] = name
-            super(PurchaseOrder, order).write(values)
+            if values:
+                super(PurchaseOrder, order).write(values)
         result = super().button_confirm()
         for order in self:
             if order.work_process_order_id.validation_picking:

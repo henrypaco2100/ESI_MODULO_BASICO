@@ -12,17 +12,14 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="sequence" string="Orden"/>
                             <field name="st_almacen" domain="[('company_id', '=', company_id)]"/>
                             <field name="purchase_journal" domain="[('company_id', '=', company_id), ('type', '=', 'purchase')]"/>
-                            <field name="payment_journal" domain="[('company_id', '=', company_id), ('type', 'in', ('bank', 'cash'))]" attrs="{'invisible': [('allow_payment_from_purchase', '=', False)]}"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="active" invisible="1"/>
                             <field name="st_entregar_a" invisible="1"/>
                         </group>
                         <group>
                             <field name="st_secuencia_quotation" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
-                            <field name="st_secuencia" domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]"/>
                             <field name="validation_picking"/>
                             <field name="validate_invoice"/>
                             <field name="allow_payment_from_purchase"/>
@@ -39,11 +36,9 @@
         <field name="arch" type="xml">
             <tree string="Tipo de Compras">
                 <field name="sequence" widget="handle" string="Ordenar"/>
-                <field name="sequence" string="Orden"/>
                 <field name="name"/>
                 <field name="st_almacen"/>
                 <field name="purchase_journal"/>
-                <field name="payment_journal"/>
                 <field name="allow_payment_from_purchase"/>
                 <field name="validation_picking"/>
                 <field name="validate_invoice"/>
@@ -68,6 +63,23 @@
                        options="{'no_create': True, 'no_create_edit': True}"
                        attrs="{'readonly': [('state', 'not in', ('draft', 'sent', 'to approve'))]}"/>
             </field>
+
+            <!-- ESI: ninguna fecha o plazo comercial se oculta.
+                 Odoo 13 oculta Fecha orden al confirmar y deja Fecha prevista/Plazo de pago
+                 en Otra información. Los mostramos también en la cabecera para que sean visibles. -->
+            <field name="date_order" position="attributes">
+                <attribute name="attrs">{'readonly': [('state', 'in', ('purchase', 'done', 'cancel'))]}</attribute>
+            </field>
+            <field name="date_order" position="after">
+                <field name="date_planned" string="Fecha prevista"
+                       attrs="{'readonly': [('state', 'in', ('purchase', 'done', 'cancel'))]}"/>
+                <field name="payment_term_id" string="Plazo de pago"
+                       options="{'no_create': True}"
+                       attrs="{'readonly': ['|', ('invoice_status', '=', 'invoiced'), ('state', '=', 'done')]}"/>
+            </field>
+            <xpath expr="//field[@name='order_line']/tree/field[@name='date_planned']" position="attributes">
+                <attribute name="optional">show</attribute>
+            </xpath>
             <field name="state" position="after">
                 <field name="esi_can_register_payment" invisible="1"/>
             </field>
