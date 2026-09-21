@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_esi_calzado_destajo_user,esi.calzado.destajo user,model_esi_calzado_destajo,mrp.group_mrp_user,1,1,1,0
+access_esi_calzado_destajo_manager,esi.calzado.destajo manager,model_esi_calzado_destajo,mrp.group_mrp_manager,1,1,1,1
+access_esi_calzado_destajo_activity_user,esi.calzado.destajo.actividad user,model_esi_calzado_destajo_actividad,mrp.group_mrp_user,1,0,0,0
+access_esi_calzado_destajo_activity_manager,esi.calzado.destajo.actividad manager,model_esi_calzado_destajo_actividad,mrp.group_mrp_manager,1,1,1,1
+access_esi_calzado_purchase_wizard,esi.calzado.purchase.request.wizard,model_esi_calzado_purchase_request_wizard,mrp.group_mrp_user,1,1,1,1
+access_esi_calzado_purchase_wizard_line,esi.calzado.purchase.request.wizard.line,model_esi_calzado_purchase_request_wizard_line,mrp.group_mrp_user,1,1,1,1
