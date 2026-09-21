@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ESI Calzados - Complemento MRP',
-    'version': '13.0.3.0.0',
+    'version': '13.0.3.0.1',
     'category': 'Manufacturing',
     'summary': 'Costos, faltantes, destajos, analítica y valoración automática para calzado',
     'description': """

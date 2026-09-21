@@ -41,11 +41,11 @@
                 <filter string="Confirmado" name="confirmed" domain="[('state','=','confirmed')]"/>
                 <filter string="Pagado" name="paid" domain="[('state','=','paid')]"/>
                 <group expand="0" string="Agrupar por">
-                    <filter string="Orden de fabricación" context="{'group_by':'production_id'}"/>
-                    <filter string="Operador" context="{'group_by':'partner_id'}"/>
-                    <filter string="Actividad" context="{'group_by':'activity_id'}"/>
-                    <filter string="Fecha" context="{'group_by':'date'}"/>
-                    <filter string="Estado" context="{'group_by':'state'}"/>
+                    <filter string="Orden de fabricación" name="group_by_production" domain="[]" context="{'group_by':'production_id'}"/>
+                    <filter string="Operador" name="group_by_partner" domain="[]" context="{'group_by':'partner_id'}"/>
+                    <filter string="Actividad" name="group_by_activity" domain="[]" context="{'group_by':'activity_id'}"/>
+                    <filter string="Fecha" name="group_by_date" domain="[]" context="{'group_by':'date'}"/>
+                    <filter string="Estado" name="group_by_state" domain="[]" context="{'group_by':'state'}"/>
                 </group>
             </search>
         </field>
@@ -74,6 +74,7 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,paid"/>
                 </header>
                 <sheet>
+                    <field name="company_id" invisible="1"/>
                     <div name="button_box" class="oe_button_box">
                         <button class="oe_stat_button" name="action_view_account_move" type="object" icon="fa-book" attrs="{'invisible':[('account_move_id','=',False)]}">
                             <div class="o_stat_info"><span class="o_stat_text">Asiento</span></div>

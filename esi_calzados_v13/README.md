@@ -30,3 +30,8 @@ Instale también `esi_produccion_report_v13` para los tres reportes:
 1. Ficha de costo de producción.
 2. Faltantes de materiales y costo.
 3. Resumen / planilla de destajos.
+
+
+## Hotfix 13.0.3.0.1
+- Corregida la vista de búsqueda de destajos para Odoo 13: los filtros de Agrupar por ahora tienen `name` y `domain="[]"`.
+- Se añadió `company_id` invisible al formulario de destajos para resolver correctamente el dominio de actividades por compañía.
