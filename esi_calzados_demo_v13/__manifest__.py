@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ESI Calzados - Demo v13',
-    'version': '13.0.3.2.3',
+    'version': '13.0.3.2.2',
     'category': 'Manufacturing',
     'summary': 'Demo ESI: 3 calzados, variantes, LdM, destajos, analítica y valoración automática',
     'description': '''

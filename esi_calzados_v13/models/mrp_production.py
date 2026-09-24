@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
-from collections import defaultdict
-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools import float_is_zero
 
 
 class MrpProduction(models.Model):
@@ -41,24 +38,6 @@ class MrpProduction(models.Model):
         string='Costo estimado / unidad', compute='_compute_esi_summary', currency_field='currency_id'
     )
     currency_id = fields.Many2one(related='company_id.currency_id', readonly=True)
-
-    # Producción en Proceso (WIP) provisional. Odoo 13 contabiliza la valoración
-    # definitiva al publicar inventario / cerrar la OF. Estos campos permiten
-    # que el Balance muestre el material ya registrado con el botón Producir
-    # mientras la OF todavía está En progreso / Por cerrar.
-    esi_wip_material_move_id = fields.Many2one(
-        'account.move', string='Asiento WIP materiales', readonly=True, copy=False
-    )
-    esi_wip_material_amount = fields.Monetary(
-        string='Materiales en Producción en Proceso', currency_field='currency_id',
-        readonly=True, copy=False, default=0.0
-    )
-    esi_wip_registered = fields.Boolean(
-        string='WIP registrado', readonly=True, copy=False, default=False
-    )
-    esi_wip_registered_date = fields.Date(
-        string='Fecha registro WIP', readonly=True, copy=False
-    )
 
     @api.onchange('product_id')
     def _onchange_product_id_esi_analytic(self):
@@ -103,146 +82,15 @@ class MrpProduction(models.Model):
         self.ensure_one()
         stock_moves = (self.move_raw_ids | self.move_finished_ids).mapped('account_move_ids')
         destajo_moves = self.esi_destajo_ids.mapped('account_move_id')
-        wip_moves = self.env['account.move'].search([('esi_mrp_production_id', '=', self.id)])
-        return stock_moves | destajo_moves | wip_moves
+        return stock_moves | destajo_moves
 
     @api.depends(
         'move_raw_ids.account_move_ids', 'move_finished_ids.account_move_ids',
-        'esi_destajo_ids.account_move_id', 'esi_wip_material_move_id'
+        'esi_destajo_ids.account_move_id'
     )
     def _compute_esi_account_moves(self):
         for production in self:
             production.esi_account_move_count = len(production._esi_get_account_moves())
-
-    def _esi_get_raw_valuation_account(self, move):
-        """Cuenta de valoración del material respetando propiedades por compañía."""
-        self.ensure_one()
-        product = move.product_id.with_context(force_company=self.company_id.id)
-        category = product.categ_id.with_context(force_company=self.company_id.id)
-        return category.property_stock_valuation_account_id
-
-    def _esi_reverse_wip_provisional(self):
-        """Revierte el asiento provisional de materiales en proceso, si existe."""
-        for production in self:
-            move = production.esi_wip_material_move_id
-            if not move:
-                production.write({
-                    'esi_wip_material_amount': 0.0,
-                    'esi_wip_registered': False,
-                    'esi_wip_registered_date': False,
-                })
-                continue
-            if move.state == 'posted':
-                move = move.sudo()
-                reverse = move._reverse_moves([{
-                    'date': fields.Date.context_today(production),
-                    'ref': _('Reversión WIP provisional %s') % production.name,
-                }], cancel=False)
-                reverse.write({
-                    'esi_mrp_production_id': production.id,
-                    'esi_wip_kind': 'reversal',
-                })
-                reverse.post()
-            elif move.state == 'draft':
-                move.sudo().unlink()
-            production.write({
-                'esi_wip_material_move_id': False,
-                'esi_wip_material_amount': 0.0,
-                'esi_wip_registered': False,
-                'esi_wip_registered_date': False,
-            })
-        return True
-
-    def _esi_sync_wip_provisional(self):
-        """Reclasifica materiales registrados con *Producir* hacia WIP.
-
-        Este asiento es deliberadamente provisional: al publicar inventario o
-        cerrar la OF se revierte antes de que Odoo genere la valoración estándar.
-        Así no existe duplicidad contable y la cuenta 154000 puede mostrar saldo
-        mientras la OF está En progreso / Por cerrar.
-        """
-        for production in self:
-            if production.state in ('draft', 'done', 'cancel'):
-                production._esi_reverse_wip_provisional()
-                continue
-
-            company = production.company_id
-            # Si una empresa aún no configuró ESI WIP, no bloqueamos el botón
-            # estándar Producir. La validación definitiva seguirá ocurriendo al cerrar.
-            if not company.esi_wip_account_id or not company.esi_production_journal_id:
-                production._esi_reverse_wip_provisional()
-                continue
-
-            # Sustituir el asiento anterior por uno recalculado evita duplicar WIP
-            # al usar varias veces Producir / Continuar producción.
-            production._esi_reverse_wip_provisional()
-
-            amounts_by_account = defaultdict(float)
-            total = 0.0
-            for raw_move in production.move_raw_ids.filtered(
-                    lambda m: m.state not in ('done', 'cancel') and m.product_id.type == 'product'):
-                qty = raw_move.quantity_done or 0.0
-                if float_is_zero(qty, precision_rounding=raw_move.product_uom.rounding):
-                    continue
-                # Mantener costo histórico de la OF cuando ya fue capturado.
-                unit_cost = raw_move.esi_cost_snapshot if raw_move.esi_cost_locked else raw_move._esi_get_live_unit_cost()
-                amount = company.currency_id.round(qty * unit_cost)
-                if company.currency_id.is_zero(amount):
-                    continue
-                valuation_account = production._esi_get_raw_valuation_account(raw_move)
-                if not valuation_account:
-                    raise UserError(_(
-                        'El material %s no tiene Cuenta de valoración de inventario en su categoría.'
-                    ) % raw_move.product_id.display_name)
-                amounts_by_account[valuation_account.id] += amount
-                total += amount
-
-            total = company.currency_id.round(total)
-            if company.currency_id.is_zero(total):
-                continue
-
-            debit_vals = {
-                'name': _('Materiales en proceso - %s') % production.name,
-                'account_id': company.esi_wip_account_id.id,
-                'debit': total,
-                'credit': 0.0,
-            }
-            if production.esi_analytic_account_id:
-                debit_vals['analytic_account_id'] = production.esi_analytic_account_id.id
-
-            line_ids = [(0, 0, debit_vals)]
-            for account_id, amount in amounts_by_account.items():
-                amount = company.currency_id.round(amount)
-                if company.currency_id.is_zero(amount):
-                    continue
-                line_ids.append((0, 0, {
-                    'name': _('Salida temporal a producción - %s') % production.name,
-                    'account_id': account_id,
-                    'debit': 0.0,
-                    'credit': amount,
-                }))
-
-            account_move = self.env['account.move'].sudo().create({
-                'date': fields.Date.context_today(production),
-                'journal_id': company.esi_production_journal_id.id,
-                'ref': _('WIP provisional materiales / %s') % production.name,
-                'type': 'entry',
-                'esi_mrp_production_id': production.id,
-                'esi_wip_kind': 'material',
-                'line_ids': line_ids,
-            })
-            account_move.post()
-            production.write({
-                'esi_wip_material_move_id': account_move.id,
-                'esi_wip_material_amount': total,
-                'esi_wip_registered': True,
-                'esi_wip_registered_date': fields.Date.context_today(production),
-            })
-        return True
-
-    def action_esi_sync_wip_provisional(self):
-        self._esi_sync_wip_provisional()
-        return True
 
     def action_view_esi_destajos(self):
         self.ensure_one()
@@ -303,18 +151,6 @@ class MrpProduction(models.Model):
                     'La ubicación virtual de Producción debe usar la cuenta %s como cuenta de valoración de entrada y salida.'
                 ) % production.company_id.esi_wip_account_id.display_name)
         return True
-
-    def action_cancel(self):
-        # Si la OF se cancela antes de cerrar, no debe quedar saldo provisional
-        # en Producción en Proceso por materiales que finalmente no se fabricarán.
-        self._esi_reverse_wip_provisional()
-        return super(MrpProduction, self).action_cancel()
-
-    def post_inventory(self):
-        # Antes de que Odoo publique la valoración real, anulamos la
-        # reclasificación provisional para evitar duplicar Materia Prima -> WIP.
-        self._esi_reverse_wip_provisional()
-        return super(MrpProduction, self).post_inventory()
 
     def button_mark_done(self):
         # El costo de destajos confirmado se capitaliza con el mecanismo estándar de mrp_account.extra_cost.

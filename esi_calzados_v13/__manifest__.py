@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'ESI Calzados - Complemento MRP',
-    'version': '13.0.3.1.0',
+    'version': '13.0.3.0.3',
     'category': 'Manufacturing',
     'summary': 'Costos, faltantes, destajos, analítica y valoración automática para calzado',
     'description': """
@@ -10,7 +10,6 @@ No reemplaza MRP ni depende de módulos de procesos personalizados.
 Agrega ficha de costos en componentes, faltantes, preparación de RFQ,
 registro de destajos sin tiempos, cuenta analítica por OF y soporte para
 valoración automática Materia Prima -> Producción en Proceso -> Producto Terminado.
-Incluye WIP provisional automático al registrar Producción, visible en Balance hasta publicar inventario/cerrar la OF.
     """,
     'author': 'ESI - Especialistas en Sistemas Integrados',
     'license': 'LGPL-3',
