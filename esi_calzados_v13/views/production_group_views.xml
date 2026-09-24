@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_esi_production_group_search" model="ir.ui.view">
+        <field name="name">esi.production.group.search</field>
+        <field name="model">esi.production.group</field>
+        <field name="arch" type="xml">
+            <search string="Buscar grupos de producción">
+                <field name="name"/>
+                <field name="origin"/>
+                <field name="partner_id"/>
+                <field name="salesperson_id"/>
+                <field name="production_manager_id"/>
+                <field name="sale_order_id"/>
+                <filter name="draft" string="Borrador" domain="[('state','=','draft')]"/>
+                <filter name="orders" string="Órdenes creadas" domain="[('state','=','orders')]"/>
+                <group expand="0" string="Agrupar por">
+                    <filter name="grp_customer" string="Cliente" domain="[]" context="{'group_by':'partner_id'}"/>
+                    <filter name="grp_manager" string="Encargado" domain="[]" context="{'group_by':'production_manager_id'}"/>
+                    <filter name="grp_state" string="Estado" domain="[]" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_esi_production_group_tree" model="ir.ui.view">
+        <field name="name">esi.production.group.tree</field>
+        <field name="model">esi.production.group</field>
+        <field name="arch" type="xml">
+            <tree string="Grupos de órdenes de producción" decoration-muted="state == 'cancel'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="origin"/>
+                <field name="partner_id"/>
+                <field name="salesperson_id" optional="hide"/>
+                <field name="production_manager_id"/>
+                <field name="production_count"/>
+                <field name="material_cost" sum="Costo materiales"/>
+                <field name="total_estimated_cost" sum="Costo total"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_esi_production_group_form" model="ir.ui.view">
+        <field name="name">esi.production.group.form</field>
+        <field name="model">esi.production.group</field>
+        <field name="arch" type="xml">
+            <form string="Grupo de órdenes de producción">
+                <header>
+                    <button name="action_create_productions" type="object" string="Crear órdenes de producción" class="oe_highlight" states="draft"/>
+                    <button name="action_refresh_from_sale" type="object" string="Actualizar faltantes desde venta" class="btn-secondary"
+                            attrs="{'invisible':['|',('sale_order_id','=',False),('state','!=','draft')]}"/>
+                    <button name="action_mark_done" type="object" string="Finalizar grupo" states="orders" class="btn-primary"/>
+                    <button name="action_cancel" type="object" string="Cancelar" states="draft,orders"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,orders,done"/>
+                </header>
+                <sheet>
+                    <div name="button_box" class="oe_button_box">
+                        <button class="oe_stat_button" name="action_view_productions" type="object" icon="fa-industry">
+                            <field name="production_count" widget="statinfo" string="Producciones"/>
+                        </button>
+                        <button class="oe_stat_button" name="action_view_materials" type="object" icon="fa-cubes">
+                            <field name="material_move_count" widget="statinfo" string="Materiales"/>
+                        </button>
+                        <button class="oe_stat_button" name="action_view_boms" type="object" icon="fa-list-alt">
+                            <field name="bom_count" widget="statinfo" string="LdM"/>
+                        </button>
+                    </div>
+                    <div class="oe_title"><h1><field name="name"/></h1></div>
+                    <group>
+                        <group string="Origen y solicitud">
+                            <field name="date"/>
+                            <field name="origin"/>
+                            <field name="sale_order_id" readonly="1"/>
+                            <field name="partner_id"/>
+                        </group>
+                        <group string="Responsables">
+                            <field name="salesperson_id"/>
+                            <field name="production_manager_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <separator string="Productos a fabricar"/>
+                    <field name="line_ids" attrs="{'readonly':[('state','!=','draft')]}" nolabel="1">
+                        <tree editable="bottom" decoration-danger="bom_ready == False">
+                            <field name="sequence" widget="handle"/>
+                            <field name="product_id"/>
+                            <field name="product_tmpl_id" invisible="1"/>
+                            <field name="variant_info" readonly="1"/>
+                            <field name="product_qty"/>
+                            <field name="product_uom_id"/>
+                            <field name="bom_id" domain="[('type','=','normal'), ('product_tmpl_id','=',product_tmpl_id), '|', ('product_id','=',product_id), ('product_id','=',False)]"/>
+                            <field name="bom_ready" invisible="1"/>
+                            <button name="action_open_bom" type="object" string="LdM" icon="fa-list-alt"/>
+                            <field name="estimated_material_cost" readonly="1"/>
+                            <field name="production_id" readonly="1"/>
+                            <button name="action_open_production" type="object" string="OF" icon="fa-external-link"
+                                    attrs="{'invisible':[('production_id','=',False)]}"/>
+                        </tree>
+                        <form string="Producto a fabricar">
+                            <group>
+                                <group>
+                                    <field name="product_id"/>
+                                    <field name="product_tmpl_id" invisible="1"/>
+                                    <field name="variant_info" readonly="1"/>
+                                    <field name="product_qty"/>
+                                    <field name="product_uom_id"/>
+                                </group>
+                                <group>
+                                    <field name="bom_id" domain="[('type','=','normal'), ('product_tmpl_id','=',product_tmpl_id), '|', ('product_id','=',product_id), ('product_id','=',False)]"/>
+                                    <field name="bom_ready" readonly="1"/>
+                                    <field name="estimated_material_cost" readonly="1"/>
+                                    <field name="production_id" readonly="1"/>
+                                </group>
+                            </group>
+                            <footer><button name="action_open_bom" type="object" string="Crear / Editar LdM" class="btn-primary"/></footer>
+                        </form>
+                    </field>
+                    <group string="Resumen de costos del grupo" col="4">
+                        <field name="material_cost" readonly="1"/>
+                        <field name="missing_cost" readonly="1"/>
+                        <field name="other_cost" readonly="1"/>
+                        <field name="total_estimated_cost" readonly="1"/>
+                    </group>
+                    <group><field name="notes" placeholder="Observaciones del encargo de producción..."/></group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="activity_ids" widget="mail_activity"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_esi_production_group" model="ir.actions.act_window">
+        <field name="name">Grupos de órdenes de producción</field>
+        <field name="res_model">esi.production.group</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_esi_production_group_search"/>
+        <field name="context">{'search_default_draft': 0}</field>
+    </record>
+
+    <menuitem id="menu_esi_production_group"
+              name="Grupos de órdenes de producción"
+              parent="mrp.menu_mrp_manufacturing"
+              action="action_esi_production_group"
+              sequence="2"
+              groups="mrp.group_mrp_user"/>
+</odoo>

@@ -6,4 +6,10 @@
         <field name="prefix">DES/%(year)s/</field>
         <field name="padding">5</field>
     </record>
+    <record id="seq_esi_production_group" model="ir.sequence">
+        <field name="name">Grupo de Producción ESI</field>
+        <field name="code">esi.production.group</field>
+        <field name="prefix">GPROD/%(year)s/</field>
+        <field name="padding">5</field>
+    </record>
 </odoo>

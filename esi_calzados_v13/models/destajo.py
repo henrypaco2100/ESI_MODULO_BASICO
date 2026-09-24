@@ -19,27 +19,39 @@ class EsiCalzadoDestajoActividad(models.Model):
         'res.company', string='Compañía', default=lambda self: self.env.company, required=True
     )
     currency_id = fields.Many2one(related='company_id.currency_id', readonly=True)
+    expense_account_id = fields.Many2one(
+        'account.account', string='Cuenta de gasto',
+        domain="[('company_id', '=', company_id)]",
+        help='Cuenta de gasto de sueldos/extras que se debita al confirmar este tipo de destajo. '
+             'El destajo ya no se capitaliza en el costo de la orden de producción.'
+    )
     notes = fields.Text(string='Observaciones')
 
 
 class EsiCalzadoDestajo(models.Model):
     _name = 'esi.calzado.destajo'
-    _description = 'Destajo de producción de calzado'
+    _description = 'Destajo de calzado (gasto independiente)'
     _order = 'date desc, id desc'
 
     name = fields.Char(string='Referencia', default='Nuevo', copy=False, readonly=True)
+    # Campo legado para mantener compatibilidad con registros existentes. Ya no se usa
+    # en formularios, reportes ni en el costo/cierre de las órdenes de producción.
     production_id = fields.Many2one(
-        'mrp.production', string='Orden de fabricación', required=True,
-        ondelete='cascade', index=True
+        'mrp.production', string='Orden de fabricación (histórico)', required=False,
+        ondelete='set null', index=True, copy=False
     )
     product_id = fields.Many2one(
-        related='production_id.product_id', string='Producto', store=True, readonly=True
+        'product.product', string='Producto / Línea (opcional)',
+        help='Referencia informativa. No vincula el destajo con una orden de producción.'
     )
-    company_id = fields.Many2one(related='production_id.company_id', store=True, readonly=True)
+    company_id = fields.Many2one(
+        'res.company', string='Compañía', required=True,
+        default=lambda self: self.env.company
+    )
     currency_id = fields.Many2one(related='company_id.currency_id', readonly=True)
     analytic_account_id = fields.Many2one(
-        related='production_id.esi_analytic_account_id',
-        string='Cuenta analítica', store=True, readonly=True
+        'account.analytic.account', string='Cuenta analítica (opcional)',
+        help='Centro de costo analítico del gasto de destajo, si corresponde.'
     )
     date = fields.Date(string='Fecha', default=fields.Date.context_today, required=True)
     partner_id = fields.Many2one(
@@ -58,6 +70,11 @@ class EsiCalzadoDestajo(models.Model):
     uom_id = fields.Many2one('uom.uom', string='Unidad de medida', required=True)
     unit_price = fields.Monetary(string='Tarifa por unidad', required=True, default=0.0)
     amount = fields.Monetary(string='Importe', compute='_compute_amount', store=True)
+    expense_account_id = fields.Many2one(
+        'account.account', string='Cuenta de gasto',
+        domain="[('company_id', '=', company_id)]",
+        help='Gasto de sueldos/extras. No afecta la valoración del producto terminado.'
+    )
     state = fields.Selection(
         [('draft', 'Borrador'), ('confirmed', 'Confirmado'), ('paid', 'Pagado')],
         string='Estado', default='draft', required=True
@@ -75,13 +92,16 @@ class EsiCalzadoDestajo(models.Model):
 
     @api.onchange('activity_id')
     def _onchange_activity_id(self):
-        if self.activity_id and not self.unit_price:
-            self.unit_price = self.activity_id.default_unit_price
+        if self.activity_id:
+            if not self.unit_price:
+                self.unit_price = self.activity_id.default_unit_price
+            if not self.expense_account_id:
+                self.expense_account_id = self.activity_id.expense_account_id
 
-    @api.onchange('production_id')
-    def _onchange_production_id(self):
-        if self.production_id and not self.uom_id:
-            self.uom_id = self.production_id.product_uom_id
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        if self.product_id and not self.uom_id:
+            self.uom_id = self.product_id.uom_id
 
     @api.depends('quantity', 'unit_price')
     def _compute_amount(self):
@@ -92,13 +112,16 @@ class EsiCalzadoDestajo(models.Model):
     def create(self, vals):
         if vals.get('name', 'Nuevo') == 'Nuevo':
             vals['name'] = self.env['ir.sequence'].next_by_code('esi.calzado.destajo') or _('Nuevo')
-        if vals.get('production_id') and not vals.get('uom_id'):
-            production = self.env['mrp.production'].browse(vals['production_id'])
-            vals['uom_id'] = production.product_uom_id.id
+        if vals.get('activity_id') and not vals.get('expense_account_id'):
+            activity = self.env['esi.calzado.destajo.actividad'].browse(vals['activity_id'])
+            vals['expense_account_id'] = activity.expense_account_id.id or False
+        if vals.get('product_id') and not vals.get('uom_id'):
+            product = self.env['product.product'].browse(vals['product_id'])
+            vals['uom_id'] = product.uom_id.id
         return super(EsiCalzadoDestajo, self).create(vals)
 
     def write(self, vals):
-        protected = {'production_id', 'partner_id', 'activity_id', 'quantity', 'uom_id', 'unit_price', 'date'}
+        protected = {'partner_id', 'activity_id', 'quantity', 'uom_id', 'unit_price', 'date', 'expense_account_id'}
         if protected.intersection(vals.keys()) and any(rec.state != 'draft' for rec in self):
             raise UserError(_('No se puede modificar un destajo confirmado.'))
         return super(EsiCalzadoDestajo, self).write(vals)
@@ -112,23 +135,26 @@ class EsiCalzadoDestajo(models.Model):
     def _create_account_move(self):
         self.ensure_one()
         company = self.company_id
-        if not company.esi_wip_account_id:
-            raise UserError(_('Configure la cuenta ESI de Producción en Proceso en la compañía.'))
+        expense_account = self.expense_account_id or self.activity_id.expense_account_id
+        if not expense_account:
+            raise UserError(_(
+                'Configure una Cuenta de gasto en la actividad %s o en el propio destajo.'
+            ) % self.activity_id.display_name)
         if not company.esi_piecework_payable_account_id:
             raise UserError(_('Configure la cuenta ESI de Destajos por Pagar en la compañía.'))
         if not company.esi_production_journal_id:
-            raise UserError(_('Configure el diario ESI de Producción en la compañía.'))
+            raise UserError(_('Configure el diario ESI de Producción/Gastos en la compañía.'))
         if self.account_move_id:
             return self.account_move_id
 
         line_name = '%s - %s - %s' % (
-            self.production_id.name,
+            self.name,
             self.activity_id.name,
             self.partner_id.display_name,
         )
         debit_vals = {
             'name': line_name,
-            'account_id': company.esi_wip_account_id.id,
+            'account_id': expense_account.id,
             'debit': self.amount,
             'credit': 0.0,
             'partner_id': self.partner_id.id,
@@ -139,7 +165,7 @@ class EsiCalzadoDestajo(models.Model):
         move = self.env['account.move'].create({
             'date': self.date,
             'journal_id': company.esi_production_journal_id.id,
-            'ref': 'Destajo %s / %s' % (self.name, self.production_id.name),
+            'ref': 'Gasto destajo %s' % self.name,
             'type': 'entry',
             'line_ids': [
                 (0, 0, debit_vals),
@@ -158,8 +184,6 @@ class EsiCalzadoDestajo(models.Model):
 
     def action_confirm(self):
         for rec in self:
-            if rec.production_id.state in ('done', 'cancel'):
-                raise UserError(_('No puede confirmar destajos de una OF finalizada o cancelada.'))
             if rec.state != 'draft':
                 continue
             rec._create_account_move()
